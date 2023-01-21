@@ -14,6 +14,6 @@ try :
     target_port = int(sys.argv[4])
     miner.connect(target_ip, target_port)
 except IndexError:
-    print("No tarrget ip or port specified")
+    print("No target ip or port specified")
 
 
