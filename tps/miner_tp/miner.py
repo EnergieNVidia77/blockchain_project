@@ -1,3 +1,9 @@
+"""
+@file miner.py
+@author Toufic Talha
+@date 2023-01-21
+"""
+
 import sys
 import threading
 from miner_class import Miner

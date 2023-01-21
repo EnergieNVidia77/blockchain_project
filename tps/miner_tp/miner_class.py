@@ -1,3 +1,9 @@
+"""
+@file miner_class.py
+@author Toufic Talha
+@date 2023-01-21
+"""
+
 import threading
 import time
 import socket
@@ -7,6 +13,12 @@ import pickle
 class Miner:
 
     def __init__(self, host, port):
+        """__init__
+
+        Args:
+            host (string): ip address of the miner
+            port (int): listening port of the miner
+        """
         self.sock_recv_conn = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
         self.sock_recv_conn.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock_recv_conn.bind((host, port))
@@ -16,6 +28,12 @@ class Miner:
         self.connected_miner = []
 
     def send_my_list(self, conn, list):
+        """send_my_list
+
+        Args:
+            conn (socket): socket of the current connection
+            list (list): list to send
+        """
         msg_to_send = "/my_tab "
         list_str = ' '.join(str(e) for e in list)
         msg_to_send = msg_to_send + list_str
@@ -23,6 +41,12 @@ class Miner:
         conn.send(packed_msg)
 
     def port_msg(self, conn, port):
+        """port_msg
+
+        Args:
+            conn (socket): socket of the current connection
+            port (int): port received
+        """
         self.send_my_list(conn, self.miners)
         self.miners.append(int(port))
         self.connected_miner.append(int(port))
@@ -30,6 +54,12 @@ class Miner:
         print(f"Known miner {self.miners}")
 
     def my_tab_msg(self, conn, list):
+        """my_tab_msg
+
+        Args:
+            conn (socket): socket of the current connection #! Probably useless
+            list (list): list of unknown miners to connect
+        """
         miners_to_connect = []
         for i in range(len(list)):
             if not int(list[i]) in self.miners:
@@ -39,6 +69,12 @@ class Miner:
             self.connect("localhost", miner)
 
     def msg_analysis(self, conn, msg):
+        """msg_analysis
+
+        Args:
+            conn (socket): socket of the current connection
+            msg (array of strings): array of words of the msg received
+        """
         if msg[0] == "/port":
             self.port_msg(conn, msg[1])
         elif msg[0] == "/my_tab":
@@ -48,6 +84,11 @@ class Miner:
             self.my_tab_msg(conn, list)
 
     def handle_miner(self, conn):
+        """handle_miner
+
+        Args:
+            conn (socket): socket of the current connection
+        """
         while True:
             packed_recv_msg = conn.recv(1024)
             if not packed_recv_msg:
@@ -59,6 +100,9 @@ class Miner:
             self.msg_analysis(conn, recv_msg)
 
     def receive(self):
+        """receive
+            Just accept new connections and then creates a thread to handle it
+        """
         while True:
             conn, addr =  self.sock_recv_conn.accept()
             print(f"Connected with {addr}")
@@ -66,11 +110,23 @@ class Miner:
             thread_miner.start()
     
     def send_port(self, conn, port):
+        """send_port
+
+        Args:
+            conn (socket): socket of the current connection
+            port (int): port to send
+        """
         msg_to_send = "/port " + str(port)
         pack_msg = pickle.dumps(msg_to_send)
         conn.send(pack_msg)
 
     def connect(self, host, port):
+        """connect
+
+        Args:
+            host (string): ip address of the remote
+            port (int): listening port of the remote 
+        """
         sock_emit_conn = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
         sock_emit_conn.connect((host, port))
         print(f"Connected to {port}")
