@@ -50,7 +50,7 @@ class Miner:
     def handle_miner(self, conn):
         while True:
             packed_recv_msg = conn.recv(1024)
-            if not recv_msg:
+            if not packed_recv_msg:
                 print("No data or connection lost")
                 break
             recv_msg = pickle.loads(packed_recv_msg)
