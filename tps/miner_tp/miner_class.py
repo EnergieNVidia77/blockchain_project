@@ -12,55 +12,72 @@ class Miner:
         self.sock_recv_conn.bind((host, port))
         self.sock_recv_conn.listen()
         print(f"Listening on {port}")
-        self.uuid = str(uuid.uuid4())
-        print(f"My uuid {self.uuid}")
-        self.miners = {}
-        self.connected_miners = []
-        #self.miners[self.uuid] = port
+        self.miners = []
+        self.connected_miner = []
 
-    def handle_initial_exchange(self, conn, flag):
+    def send_my_list(self, conn, list):
+        msg_to_send = "/my_tab "
+        list_str = ' '.join(str(e) for e in list)
+        msg_to_send = msg_to_send + list_str
+        packed_msg = pickle.dumps(msg_to_send)
+        conn.send(packed_msg)
+
+    def port_msg(self, conn, port):
+        self.send_my_list(conn, self.miners)
+        self.miners.append(int(port))
+        self.connected_miner.append(int(port))
+        print(f"My connected miners {self.connected_miner}")
+        print(f"Known miner {self.miners}")
+
+    def my_tab_msg(self, conn, list):
+        miners_to_connect = []
+        for i in range(len(list)):
+            if not int(list[i]) in self.miners:
+                print(f"Adding {int(list[i])} to connect")
+                miners_to_connect.append(int(list[i]))
+        for miner in miners_to_connect:
+            self.connect("localhost", miner)
+
+    def msg_analysis(self, conn, msg):
+        if msg[0] == "/port":
+            self.port_msg(conn, msg[1])
+        elif msg[0] == "/my_tab":
+            list = []
+            for i in range(1, len(msg)):
+                list.append(msg[i])
+            self.my_tab_msg(conn, list)
+
+    def handle_miner(self, conn):
         while True:
-            recv_msg = conn.recv(1024).decode()
+            packed_recv_msg = conn.recv(1024)
+            recv_msg = pickle.loads(packed_recv_msg)
             if not recv_msg:
                 print("No data or connection lost")
                 break
-            array_recv_msg = recv_msg.split()
-            print(f"Miner's uuid {array_recv_msg[0]} and miner's listening port {array_recv_msg[1]}")
-            if not array_recv_msg[0] in self.miners:
-                self.miners[array_recv_msg[0]] = array_recv_msg[1]
-                print(self.miners)
-            if flag:
-                self.send_info(conn)
-                time.sleep(0.5)
-                for miner in self.miners:
-                    if miner != array_recv_msg[0]:
-                        msg_to_send = miner + " " + self.miners[miner]
-                        print(msg_to_send)
-                        conn.send(msg_to_send.encode())
-            else:
-                print(array_recv_msg[0])
-                print(array_recv_msg[1])
-                if not int(array_recv_msg[1]) in self.connected_miners:
-                    self.connect('127.0.0.1', int(array_recv_msg[1]))
+            recv_msg = recv_msg.split()
+            print(f"I received {recv_msg}")
+            self.msg_analysis(conn, recv_msg)
 
     def receive(self):
         while True:
             conn, addr =  self.sock_recv_conn.accept()
             print(f"Connected with {addr}")
-            recv_thread = threading.Thread(target=self.handle_initial_exchange, args=(conn, 1))
-            recv_thread.start()
+            thread_miner = threading.Thread(target=self.handle_miner, args=(conn,))
+            thread_miner.start()
     
-    def send_info(self, conn):
-        recv_addr = self.sock_recv_conn.getsockname()
-        all_info = self.uuid + " " + str(recv_addr[1])
-        encoded_info = all_info.encode()
-        conn.send(encoded_info)
+    def send_port(self, conn, port):
+        msg_to_send = "/port " + str(port)
+        pack_msg = pickle.dumps(msg_to_send)
+        conn.send(pack_msg)
 
     def connect(self, host, port):
         sock_emit_conn = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
         sock_emit_conn.connect((host, port))
         print(f"Connected to {port}")
-        self.connected_miners.append(port)
-        self.send_info(sock_emit_conn)
-        recv_thread = threading.Thread(target=self.handle_initial_exchange, args=(sock_emit_conn, 0))
-        recv_thread.start()
+        self.miners.append(port)
+        self.connected_miner.append(port)
+        my_addr, my_port = self.sock_recv_conn.getsockname()
+        self.send_port(sock_emit_conn, my_port)
+        thread_miner = threading.Thread(target=self.handle_miner, args=(sock_emit_conn,))
+        thread_miner.start()
+        
