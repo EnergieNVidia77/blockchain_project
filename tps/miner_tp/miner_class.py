@@ -25,6 +25,7 @@ class Miner:
         print(f"Listening on {port}")
         self.miners = []
         self.socket_dict = {}
+        self.wallets = []
         #self.nb_recv_conn = 0
         #self.nb_send_conn = 0
 
@@ -85,6 +86,14 @@ class Miner:
         self.miners.remove(int(port))
         del self.socket_dict[str(port)]
 
+    def wallet_login(self, addr):
+        self.wallets.append(addr)
+
+    def broadcast(self, msg):
+        packed_msg = pickle.dumps(msg)
+        for port in self.miners:
+            self.socket_dict[str(port)].send(packed_msg)
+
     def msg_analysis(self, conn, msg):
         """msg_analysis
 
@@ -101,6 +110,12 @@ class Miner:
             self.my_tab_msg(list)
         elif msg[0] == "/logout":
             self.logout_miner(msg[1])
+        elif msg[0] == "/wallet_login":
+            self.wallet_login(msg[1])
+        elif msg[0] == "/transac":
+            self.broadcast(msg[1])
+        else:
+            print(msg)
         self.print_miner_info()
 
     def handle_miner(self, conn):
