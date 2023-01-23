@@ -12,7 +12,7 @@ my_ip = sys.argv[1]
 my_port = int(sys.argv[2])
 
 miner = Miner(my_ip, my_port)
-receive_thread = threading.Thread(target=miner.receive)
+receive_thread = threading.Thread(target=miner.receive) #peut etre que ca on peut le faire dans le init directement
 receive_thread.start()
 
 try :
