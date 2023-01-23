@@ -5,10 +5,9 @@
 """
 
 import threading
-import time
 import socket
-import uuid
 import pickle
+import time
 
 class Miner:
 
@@ -26,6 +25,14 @@ class Miner:
         print(f"Listening on {port}")
         self.miners = []
         self.connected_miner = []
+        self.nb_recv_conn = 0
+        self.nb_send_conn = 0
+
+    def print_miner_info(self):
+        print(f"My connected miners {self.connected_miner}")
+        print(f"Known miner {self.miners}")
+        print(f"Current open recv connections: {self.nb_recv_conn}")
+        print(f"Current open emit connections: {self.nb_send_conn}")
 
     def send_my_list(self, conn, list):
         """send_my_list
@@ -50,8 +57,8 @@ class Miner:
         self.send_my_list(conn, self.miners)
         self.miners.append(int(port))
         self.connected_miner.append(int(port))
-        print(f"My connected miners {self.connected_miner}")
-        print(f"Known miner {self.miners}")
+        #print(f"My connected miners {self.connected_miner}")
+        #print(f"Known miner {self.miners}")
 
     def my_tab_msg(self, conn, list):
         """my_tab_msg
@@ -82,6 +89,7 @@ class Miner:
             for i in range(1, len(msg)):
                 list.append(msg[i])
             self.my_tab_msg(conn, list)
+        self.print_miner_info()
 
     def handle_miner(self, conn):
         """handle_miner
@@ -96,17 +104,18 @@ class Miner:
                 break
             recv_msg = pickle.loads(packed_recv_msg)
             recv_msg = recv_msg.split()
-            print(f"I received {recv_msg}")
+            #print(f"I received {recv_msg}")
             self.msg_analysis(conn, recv_msg)
 
     def receive(self):
         """receive
-            Just accept new connections and then creates a thread to handle it
+            Just accept new connections and then creates a thread to handle them
         """
         while True:
             conn, addr =  self.sock_recv_conn.accept()
-            print(f"Connected with {addr}")
-            thread_miner = threading.Thread(target=self.handle_miner, args=(conn,))
+            self.nb_recv_conn += 1
+            #print(f"Connected with {addr}")
+            thread_miner = threading.Thread(target=self.handle_miner, args=(conn,), daemon=True)
             thread_miner.start()
     
     def send_port(self, conn, port):
@@ -129,11 +138,12 @@ class Miner:
         """
         sock_emit_conn = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
         sock_emit_conn.connect((host, port))
-        print(f"Connected to {port}")
+        #print(f"Connected to {port}")
+        self.nb_send_conn += 1
         self.miners.append(port)
         self.connected_miner.append(port)
         my_addr, my_port = self.sock_recv_conn.getsockname()
         self.send_port(sock_emit_conn, my_port)
-        thread_miner = threading.Thread(target=self.handle_miner, args=(sock_emit_conn,))
+        thread_miner = threading.Thread(target=self.handle_miner, args=(sock_emit_conn,), daemon=True)
         thread_miner.start()
         
