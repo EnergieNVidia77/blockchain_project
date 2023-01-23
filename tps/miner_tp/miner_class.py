@@ -25,13 +25,23 @@ class Miner:
         print(f"Listening on {port}")
         self.miners = []
         self.socket_dict = {}
-        self.nb_recv_conn = 0
-        self.nb_send_conn = 0
+        #self.nb_recv_conn = 0
+        #self.nb_send_conn = 0
 
     def print_miner_info(self):
         print(f"Known miner {self.miners}")
-        print(f"Current open recv connections: {self.nb_recv_conn}")
-        print(f"Current open emit connections: {self.nb_send_conn}")
+        #print(f"Current open recv connections: {self.nb_recv_conn}")
+        #print(f"Current open emit connections: {self.nb_send_conn}")
+        #print("My sockets:")
+        #print(self.socket_dict)
+
+    def close_connections(self):
+        addr, port = self.sock_recv_conn.getsockname()
+        msg = "/logout " + str(port)
+        for port in self.socket_dict:
+            self.socket_dict[port].send(pickle.dumps(msg))
+            self.socket_dict[port].shutdown(socket.SHUT_RDWR)
+            self.socket_dict[port].close()
 
     def send_my_list(self, conn, list):
         """send_my_list
@@ -55,6 +65,7 @@ class Miner:
         """
         self.send_my_list(conn, self.miners)
         self.miners.append(int(port))
+        self.socket_dict[port] = conn
 
     def my_tab_msg(self, list):
         """my_tab_msg
@@ -69,6 +80,10 @@ class Miner:
                 miners_to_connect.append(int(list[i]))
         for miner in miners_to_connect:
             self.connect("localhost", miner)
+    
+    def logout_miner(self,port):
+        self.miners.remove(int(port))
+        del self.socket_dict[str(port)]
 
     def msg_analysis(self, conn, msg):
         """msg_analysis
@@ -84,6 +99,8 @@ class Miner:
             for i in range(1, len(msg)):
                 list.append(msg[i])
             self.my_tab_msg(list)
+        elif msg[0] == "/logout":
+            self.logout_miner(msg[1])
         self.print_miner_info()
 
     def handle_miner(self, conn):
@@ -108,7 +125,7 @@ class Miner:
         """
         while True:
             conn, addr =  self.sock_recv_conn.accept()
-            self.nb_recv_conn += 1
+            #self.nb_recv_conn += 1
             #print(f"Connected with {addr}")
             thread_miner = threading.Thread(target=self.handle_miner, args=(conn,), daemon=True)
             thread_miner.start()
@@ -134,8 +151,9 @@ class Miner:
         sock_emit_conn = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
         sock_emit_conn.connect((host, port))
         #print(f"Connected to {port}")
-        self.nb_send_conn += 1
+        #self.nb_send_conn += 1
         self.miners.append(port)
+        self.socket_dict[port] = sock_emit_conn
         my_addr, my_port = self.sock_recv_conn.getsockname()
         self.send_port(sock_emit_conn, my_port)
         thread_miner = threading.Thread(target=self.handle_miner, args=(sock_emit_conn,), daemon=True)

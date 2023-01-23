@@ -25,5 +25,6 @@ except IndexError:
 while True:
     cmd = input()
     if cmd == 'exit':
+        miner.close_connections()
         break 
 
