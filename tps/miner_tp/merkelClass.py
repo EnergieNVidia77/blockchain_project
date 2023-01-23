@@ -20,7 +20,17 @@ class merkelTree:
             return self.nextR.evalValue() + self.nextL.evalValue()
     
     def proof(self, i):
-        break
+        if self.nb <= 1:
+            return []
+        if i >= self.nb:
+            return []
+        else:
+            depth = findDepth(self.nb)
+            if i < 2**(depth - 1):
+                return [self.nextR.value] + self.nextL.proof(i%(2**(depth - 1)))
+            else:
+                return [self.nextL.value] + self.nextR.proof(i%(2**(depth - 1)))
+            
                                                     
 
 
