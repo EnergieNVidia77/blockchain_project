@@ -31,6 +31,7 @@ class Miner:
 
     def print_miner_info(self):
         print(f"Known miner {self.miners}")
+        print(f"My wallets: {self.wallets}")
         #print(f"Current open recv connections: {self.nb_recv_conn}")
         #print(f"Current open emit connections: {self.nb_send_conn}")
         #print("My sockets:")
@@ -113,7 +114,10 @@ class Miner:
         elif msg[0] == "/wallet_login":
             self.wallet_login(msg[1])
         elif msg[0] == "/transac":
-            self.broadcast(msg[1])
+            list = []
+            for i in range(1, len(msg)):
+                list.append(msg[i])
+            self.broadcast(list)
         else:
             print(msg)
         self.print_miner_info()
