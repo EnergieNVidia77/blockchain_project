@@ -133,8 +133,8 @@ class Miner:
         """connect
 
         Args:
-            host (string): ip address of the remote
-            port (int): listening port of the remote 
+            host (string): ip address of the remote target  
+            port (int): listening port of the remote target
         """
         sock_emit_conn = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
         sock_emit_conn.connect((host, port))
