@@ -24,12 +24,11 @@ class Miner:
         self.sock_recv_conn.listen()
         print(f"Listening on {port}")
         self.miners = []
-        self.connected_miner = []
+        self.socket_dict = {}
         self.nb_recv_conn = 0
         self.nb_send_conn = 0
 
     def print_miner_info(self):
-        print(f"My connected miners {self.connected_miner}")
         print(f"Known miner {self.miners}")
         print(f"Current open recv connections: {self.nb_recv_conn}")
         print(f"Current open emit connections: {self.nb_send_conn}")
@@ -56,15 +55,11 @@ class Miner:
         """
         self.send_my_list(conn, self.miners)
         self.miners.append(int(port))
-        self.connected_miner.append(int(port))
-        #print(f"My connected miners {self.connected_miner}")
-        #print(f"Known miner {self.miners}")
 
-    def my_tab_msg(self, conn, list):
+    def my_tab_msg(self, list):
         """my_tab_msg
 
         Args:
-            conn (socket): socket of the current connection #! Probably useless
             list (list): list of unknown miners to connect
         """
         miners_to_connect = []
@@ -88,7 +83,7 @@ class Miner:
             list = []
             for i in range(1, len(msg)):
                 list.append(msg[i])
-            self.my_tab_msg(conn, list)
+            self.my_tab_msg(list)
         self.print_miner_info()
 
     def handle_miner(self, conn):
@@ -141,9 +136,7 @@ class Miner:
         #print(f"Connected to {port}")
         self.nb_send_conn += 1
         self.miners.append(port)
-        self.connected_miner.append(port)
         my_addr, my_port = self.sock_recv_conn.getsockname()
         self.send_port(sock_emit_conn, my_port)
         thread_miner = threading.Thread(target=self.handle_miner, args=(sock_emit_conn,), daemon=True)
         thread_miner.start()
-        
