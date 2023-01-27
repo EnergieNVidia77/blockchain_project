@@ -29,11 +29,17 @@ class Wallet:
 	def send_transaction(con):
 		while True:
 			msg = input()
+			pack_msg = pickle.dumps(msg)
 			msg = msg.split()
 			if msg[0] = "/transac":
 				rcvr = msg[1]
 				amount = msg[-1]
-			
+				if amount <= self.balance :
+					con.send(pack_msg)
+					print(f"Sending {amount} to {rcvr}")
+				else :
+					print("Not enough in your balance")
+	
 	def rcv_transaction()
 		while True:
 		    packed_recv_msg = conn.recv(1024)
@@ -42,7 +48,7 @@ class Wallet:
 			break
 		    recv_msg = pickle.loads(packed_recv_msg)
 		    recv_msg = recv_msg.split()
-		    #print(f"I received {recv_msg}")
+		    print(f"I received {recv_msg}")
 		    self.msg_analysis(recv_msg)
 
 	def msg_analysis(msg):
@@ -50,3 +56,4 @@ class Wallet:
 		if msg[0] == "/success":
 			amount = int(msg[1])
 			self.balance -= amount
+		
