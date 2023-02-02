@@ -97,8 +97,14 @@ class Miner:
         self.miners.remove(int(port))
         del self.socket_dict[port]
 
-    def wallet_login(self, addr):
-        self.wallets.append(addr)
+    def wallet_login(self, port):
+        """wallet_login : register a new wallet
+
+        Args:
+            port (str): port of the wallet
+        """
+        self.wallets.append(int(port))
+        self.print_miner_info()
 
     def broadcast(self, msg):
         packed_msg = pickle.dumps(msg)
@@ -125,6 +131,10 @@ class Miner:
                     self.my_tab_msg(list)
                 elif data[0] == "/logout":
                     self.logout_miner(data[1])
+                elif data[0] == "/wallet_login":
+                    self.wallet_login(msg.get_sender())
+                    data = "/sucess_log"
+                    conn.send(pickle.dumps(data))
 
     def handle_miner(self, conn):
         """handle_miner : function to handle a connection
