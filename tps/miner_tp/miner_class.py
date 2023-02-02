@@ -136,8 +136,8 @@ class Miner:
                     data = "/sucess_log"
                     conn.send(pickle.dumps(data))
 
-    def handle_miner(self, conn):
-        """handle_miner : function to handle a connection
+    def handle_conn(self, conn):
+        """handle_conn : function to handle a connection
 
         Args:
             conn (socket): socket of the current connection
@@ -159,7 +159,7 @@ class Miner:
             conn, addr =  self.sock_recv_conn.accept()
             #self.nb_recv_conn += 1
             #print(f"Connected with {addr}")
-            thread_miner = threading.Thread(target=self.handle_miner, args=(conn,), daemon=True)
+            thread_miner = threading.Thread(target=self.handle_conn, args=(conn,), daemon=True)
             thread_miner.start()
     
     def send_port(self, conn, sender, recipient):
@@ -188,5 +188,5 @@ class Miner:
         self.socket_dict[str(port)] = sock_emit_conn
         my_addr, my_port = self.sock_recv_conn.getsockname()
         self.send_port(sock_emit_conn, my_port, port)
-        thread_miner = threading.Thread(target=self.handle_miner, args=(sock_emit_conn,), daemon=True)
+        thread_miner = threading.Thread(target=self.handle_conn, args=(sock_emit_conn,), daemon=True)
         thread_miner.start()
