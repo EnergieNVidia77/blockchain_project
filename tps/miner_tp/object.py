@@ -1,4 +1,5 @@
 import datetime
+import random
 
 class Block():
     def __init__(self,ounce,transactions,previous_block_hash):
@@ -17,6 +18,7 @@ class Block():
         res = 20*"-"+"\n"
         res+="Block\n"
         res+=f"Hash of the previous block: {self.previous_block_hash}\n"
+        res+=f"Hash of this block: {self.get_hash()}\n"
         res+=f"ounce: {self.ounce}\n"
         res+=f"Number of transactions: {len(self.transactions)}\nList of transactions:\n"
 
@@ -27,6 +29,12 @@ class Block():
 
     def get_hash(self):
         return hash(self)
+
+    def have_transactions(self):
+        if len(self.transactions) == 0:
+            return False
+        else:
+            return True
 
 class Blockchain():
     def __init__(self):
@@ -51,6 +59,8 @@ class Blockchain():
     def get_last_block(self):
         return self.blocks[-1]
 
+    def get_headers(self):
+        return [block.get_header() for block in self.blocks]
 """
 A wrapper class to send message easily between nodes or nodes-wallet
 @author: port number of the sender
@@ -94,6 +104,21 @@ class Message():
 
         return res
 
+"""
+Dummy class, waiting for Jing's part'
+
+class Transaction():
+    def __init__(self,sender,receiver,amount):
+        self.sender = sender
+        self.receiver = receiver
+        self.amount = amount
+
+    def get_hash(self):
+        return hash(self)
+"""
+
+
+
 #Testing purposes
 if __name__ == "__main__":
     print("Testing the Message class")
@@ -115,14 +140,17 @@ if __name__ == "__main__":
     for s in ls :
         li = []
         for r in rs:
-            li.append(Message(s,r,s+r))
+            li.append(Transaction(s,r,s+r))
         o = s + "".join(rs)
         if bc.get_nb_blocks() == 0:
             prev_hash = None
         else:
             prev_hash = hash(bc.get_last_block())
         block = Block(o,li,prev_hash)
+        #block.add_transaction(Transaction())
         print(block)
         bc.add_block(block)
     print("End:")
     print(bc)
+    print("Headers of all the blocks")
+    print(bc.get_headers())
