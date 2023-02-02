@@ -13,7 +13,7 @@ from message_class import Message
 class Miner:
 
     def __init__(self, host, port):
-        """__init__
+        """__init__ : creates a miner object
 
         Args:
             host (string): ip address of the miner
@@ -29,26 +29,31 @@ class Miner:
         self.wallets = []
 
     def print_miner_info(self):
+        """print_miner_info : show some info about the miner
+        """
         print(f"Known miner {self.miners}")
         print(f"My wallets: {self.wallets}")
         print("My sockets:")
         print(self.socket_dict)
 
     def close_connections(self):
-        addr, port = self.sock_recv_conn.getsockname()
-        data = "/logout " + str(port)
+        """close_connections : close all the connection with other miners
+        """
+        addr, sender = self.sock_recv_conn.getsockname()
+        data = "/logout " + str(sender)
         for destPort in self.socket_dict:
-            msg = Message(port, destPort, data)
+            msg = Message(sender, destPort, data)
             self.socket_dict[destPort].send(pickle.dumps(msg))
             self.socket_dict[destPort].shutdown(socket.SHUT_RDWR)
             self.socket_dict[destPort].close()
 
     def send_my_list(self, conn, list, recipient):
-        """send_my_list
+        """send_my_list : sends the list of all know miners to the newly connected miner
 
         Args:
             conn (socket): socket of the current connection
             list (list): list to send
+            recipient (str) : port of the recipient
         """
         my_addr, my_port = self.sock_recv_conn.getsockname()
         command = "/my_tab "
@@ -59,7 +64,7 @@ class Miner:
         conn.send(packed_msg)
 
     def port_msg(self, conn, port):
-        """port_msg
+        """port_msg : add the newly connected miner to the know miner list 
 
         Args:
             conn (socket): socket of the current connection
@@ -70,7 +75,7 @@ class Miner:
         self.socket_dict[port] = conn
 
     def my_tab_msg(self, list):
-        """my_tab_msg
+        """my_tab_msg : connect to all the miners that the miner I connected sent me
 
         Args:
             list (list): list of unknown miners to connect
@@ -84,8 +89,13 @@ class Miner:
             self.connect("localhost", miner)
     
     def logout_miner(self,port):
+        """logout_miner : remove the miner that just logged out
+
+        Args:
+            port (str): port of the loogged out miner
+        """
         self.miners.remove(int(port))
-        del self.socket_dict[str(port)]
+        del self.socket_dict[port]
 
     def wallet_login(self, addr):
         self.wallets.append(addr)
@@ -96,11 +106,11 @@ class Miner:
             self.socket_dict[str(port)].send(packed_msg)
 
     def msg_analysis(self, conn, msg):
-        """msg_analysis
+        """msg_analysis : analyze the incomming message
 
         Args:
             conn (socket): socket of the current connection
-            msg (array of strings): array of words of the msg received
+            msg (Message): incomming message
         """
         payload = msg.get_payload()
         match payload:
@@ -117,7 +127,7 @@ class Miner:
                     self.logout_miner(data[1])
 
     def handle_miner(self, conn):
-        """handle_miner
+        """handle_miner : function to handle a connection
 
         Args:
             conn (socket): socket of the current connection
@@ -143,13 +153,12 @@ class Miner:
             thread_miner.start()
     
     def send_port(self, conn, sender, recipient):
-        """send_port
+        """send_port : send the /port command to the miner I connected to
 
         Args:
             conn (socket): socket of the current connection
             port (int): port to send
         """
-        #print(f"sender {sender} recipient {recipient}")
         data = "/port " + str(sender)
         msg_to_send = Message(sender, recipient, data)
         print(msg_to_send)
@@ -157,7 +166,7 @@ class Miner:
         conn.send(pack_msg)
 
     def connect(self, host, port):
-        """connect
+        """connect : function to connect to a miner
 
         Args:
             host (string): ip address of the remote target  
@@ -165,8 +174,6 @@ class Miner:
         """
         sock_emit_conn = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
         sock_emit_conn.connect((host, port))
-        #print(f"Connected to {port}")
-        #self.nb_send_conn += 1
         self.miners.append(port)
         self.socket_dict[str(port)] = sock_emit_conn
         my_addr, my_port = self.sock_recv_conn.getsockname()
