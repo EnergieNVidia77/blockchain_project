@@ -39,3 +39,4 @@ class Message():
         res+= f"Payload:\n"
         res+=str(self.payload)+"\n"
         res+=20*"-"
+        return res
