@@ -8,6 +8,7 @@ import threading
 import socket
 import pickle
 import time
+from message_class import Message
 
 class Miner:
 
