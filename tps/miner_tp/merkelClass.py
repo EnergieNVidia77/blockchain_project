@@ -17,7 +17,7 @@ class merkelTree:
         elif self.nextR != None and self.nextL == None:
             return self.nextL.evalValue()
         else :
-            return self.nextR.evalValue() + self.nextL.evalValue()
+            return hash(self.nextR.evalValue() + self.nextL.evalValue())
     
     def proof(self, i):
         if self.nb <= 1:
@@ -70,3 +70,11 @@ def makeMerkel(LV):
         toReturn.modifyValue(toReturnValue)
         return toReturn
 
+def EvalProof(proof, leaf, head):
+    currentRes = leaf
+    for i in reversed(proof):
+        currentRes = hash(i + currentRes)
+    if currentRes == head:
+        return True
+    else:
+        return False
