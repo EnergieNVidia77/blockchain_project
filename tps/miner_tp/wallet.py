@@ -23,8 +23,8 @@ class Wallet:
 
 	def handle_connection(con):
 		snd_th = threading.Thread(target=self.send_transaction, args=(con,), daemon=True)
-		rcv_th = threading.Thread(target=self.rcv_transaction, args=(con,), daemon=True)
-		snd_th.start() ; rcv_th.start()
+		#rcv_th = threading.Thread(target=self.rcv_transaction, args=(con,), daemon=True)
+		#snd_th.start() ; rcv_th.start()
 
 	def send_transaction(con):
 		while True:
