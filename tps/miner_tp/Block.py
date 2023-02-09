@@ -4,9 +4,6 @@ class Block():
         self.ounce = ounce
         self.transactions = transactions
 
-    def add_transaction(self,transaction):
-        self.transactions.append(transaction)
-
     def get_header(self):
         res = [transaction.get_hash() for transaction in self.transactions]
         return res
