@@ -2,7 +2,6 @@ import threading
 import socket
 import pickle
 import time
-from message_class import Message
 
 class Wallet:
 
@@ -27,9 +26,7 @@ class Wallet:
 		rcv_th = threading.Thread(target=self.rcv_transaction, args=(con,), daemon=True)
 		rcv_th.start()
 
-	def send_transaction(self, transaction):
-		data = transaction.split()
-		msg = Message(self.adress, data[1], data[2])
+	def send_transaction(self, msg):
 		msg = pickle.dumps(msg)	
 		self.sock_emit_conn.send(msg)
 
@@ -41,13 +38,13 @@ class Wallet:
 				print("No data or connection lost")
 				return 
 			recv_msg = pickle.loads(packed_recv_msg)
+			recv_msg = recv_msg.split()
 			print(f"I received {recv_msg}")
-			self.msg_analysis(recv_msg)
+			#self.msg_analysis(recv_msg)
 
 	def msg_analysis(self, msg):
-		payload = msg.get_payload()
-		data = payload.split()
-		if data[0] == "/success":
+		msg = msg.split()
+		if msg[0] == "/success":
 			amount = int(msg[1])
 			self.balance -= amount
 		
