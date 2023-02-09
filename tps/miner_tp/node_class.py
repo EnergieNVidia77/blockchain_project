@@ -14,7 +14,6 @@ class Node:
 
     def __init__(self, host, port):
         """__init__ : creates a miner object
-
         Args:
             host (string): ip address of the miner
             port (int): listening port of the miner
@@ -49,7 +48,6 @@ class Node:
 
     def send_my_list(self, conn, list, recipient):
         """send_my_list : sends the list of all know miners to the newly connected miner
-
         Args:
             conn (socket): socket of the current connection
             list (list): list to send
@@ -65,7 +63,6 @@ class Node:
 
     def port_msg(self, conn, port):
         """port_msg : add the newly connected miner to the know miner list 
-
         Args:
             conn (socket): socket of the current connection
             port (int): port received
@@ -76,7 +73,6 @@ class Node:
 
     def my_tab_msg(self, list):
         """my_tab_msg : connect to all the miners that the miner I connected sent me
-
         Args:
             list (list): list of unknown miners to connect
         """
@@ -90,7 +86,6 @@ class Node:
     
     def logout_miner(self,port):
         """logout_miner : remove the miner that just logged out
-
         Args:
             port (str): port of the loogged out miner
         """
@@ -99,7 +94,6 @@ class Node:
 
     def wallet_login(self, port):
         """wallet_login : register a new wallet
-
         Args:
             port (str): port of the wallet
         """
@@ -113,7 +107,6 @@ class Node:
 
     def msg_analysis(self, conn, msg):
         """msg_analysis : analyze the incomming message
-
         Args:
             conn (socket): socket of the current connection
             msg (Message): incomming message
@@ -134,11 +127,12 @@ class Node:
                 elif data[0] == "/wallet_login":
                     self.wallet_login(msg.get_sender())
                     data = "/sucess_log"
-                    conn.send(pickle.dumps(data))
+                    addr, port = self.sock_recv_conn.getsockname()
+                    my_msg = Message(port, msg.get_sender(), data)
+                    conn.send(pickle.dumps(my_msg))
 
     def handle_conn(self, conn):
         """handle_conn : function to handle a connection
-
         Args:
             conn (socket): socket of the current connection
         """
@@ -164,7 +158,6 @@ class Node:
     
     def send_port(self, conn, sender, recipient):
         """send_port : send the /port command to the miner I connected to
-
         Args:
             conn (socket): socket of the current connection
             port (int): port to send
@@ -177,7 +170,6 @@ class Node:
 
     def connect(self, host, port):
         """connect : function to connect to a miner
-
         Args:
             host (string): ip address of the remote target  
             port (int): listening port of the remote target
