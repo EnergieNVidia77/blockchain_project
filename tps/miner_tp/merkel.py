@@ -1,15 +1,14 @@
 import merkelClass as mC
 import Transaction as Tr
+import Block
 
 transactionList = [Tr.Transaction("alice", "bob", 50), Tr.Transaction("didier", "ernest", 30),
                     Tr.Transaction("philipe", "roger", 5), Tr.Transaction("patrick", "caramba", 150)]
-HashList = [i.get_hash() for i in transactionList]
-print(HashList)
-A = mC.makeMerkel(HashList)
+myBlock = Block.Block(122, transactionList, "salut les bro")
+myMerkel = myBlock.get_header()
+print(myMerkel.get_root())
 print("")
-print(mC.printArbre(A))
+myProof = myMerkel.proof(3)
+print(myProof)
 print("")
-B = A.proof(3)
-print(A.proof(3))
-print("")
-print(mC.EvalProof(B, 7, A.value))
+print(mC.EvalProof(myProof, hash(transactionList[3]), myMerkel.get_root()))
