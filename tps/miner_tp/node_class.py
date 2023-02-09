@@ -127,7 +127,9 @@ class Node:
                 elif data[0] == "/wallet_login":
                     self.wallet_login(msg.get_sender())
                     data = "/sucess_log"
-                    conn.send(pickle.dumps(data))
+                    addr, port = self.sock_recv_conn.getsockname()
+                    my_msg = Message(port, msg.get_sender(), data)
+                    conn.send(pickle.dumps(my_msg))
 
     def handle_conn(self, conn):
         """handle_conn : function to handle a connection

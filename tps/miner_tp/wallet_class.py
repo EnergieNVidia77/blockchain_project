@@ -2,10 +2,11 @@ import threading
 import socket
 import pickle
 import time
+from message_class import Message
 
 class Wallet:
 
-	def __init__(self, address, host, Mport):
+	def __init__(self, address, port, Mport):
 		#balance (default 100)
 		self.balance = 100
 		#miner
@@ -17,8 +18,9 @@ class Wallet:
 		self.sock_emit_conn.connect((address, Mport))
 		print(f"Connected to {Mport}")
 		print(f"emit socket : {self.sock_emit_conn}")
-		msg_to_miner = "/wallet_login " + str(host)
-		pack_msg = pickle.dumps(msg_to_miner)
+		msg_to_miner = "/wallet_login"
+		message = Message(port, Mport, msg_to_miner)
+		pack_msg = pickle.dumps(message)
 		self.sock_emit_conn.send(pack_msg)
 		self.handle_connection(self.sock_emit_conn)
 
@@ -40,11 +42,12 @@ class Wallet:
 				print("No data or connection lost")
 				return 
 			recv_msg = pickle.loads(packed_recv_msg)
-			recv_msg = recv_msg.split()
 			print(f"I received {recv_msg}")
 			self.msg_analysis(recv_msg)
 		
 	def msg_analysis(self, msg):
+		print(type(msg))
+		print(msg)
 		payload = msg.get_payload()
 		data = payload.split()
 		if data[0] == "/success":
