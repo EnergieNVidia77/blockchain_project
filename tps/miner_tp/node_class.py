@@ -10,11 +10,12 @@ import pickle
 import time
 from message_class import Message
 
-class Miner:
+class Node:
 
 	def __init__(self, host, port):
 		"""__init__
 
+<<<<<<< HEAD:tps/miner_tp/miner_class.py
 		Args:
 			host (string): ip address of the miner
 			port (int): listening port of the miner
@@ -37,6 +38,28 @@ class Miner:
 		#print(f"Current open emit connections: {self.nb_send_conn}")
 		#print("My sockets:")
 		#print(self.socket_dict)
+=======
+        Args:
+            host (string): ip address of the miner
+            port (int): listening port of the miner
+        """
+        self.sock_recv_conn = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
+        self.sock_recv_conn.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.sock_recv_conn.bind((host, port))
+        self.sock_recv_conn.listen()
+        print(f"Listening on {port}")
+        self.node = []
+        self.socket_dict = {}
+        self.wallets = []
+
+    def print_miner_info(self):
+        """print_miner_info : show some info about the miner
+        """
+        print(f"Known miner {self.node}")
+        print(f"My wallets: {self.wallets}")
+        print("My sockets:")
+        print(self.socket_dict)
+>>>>>>> master:tps/miner_tp/node_class.py
 
 	def close_connections(self):
 		addr, port = self.sock_recv_conn.getsockname()
@@ -62,6 +85,7 @@ class Miner:
 	def port_msg(self, conn, port):
 		"""port_msg
 
+<<<<<<< HEAD:tps/miner_tp/miner_class.py
 		Args:
 			conn (socket): socket of the current connection
 			port (int): port received
@@ -69,10 +93,20 @@ class Miner:
 		self.send_my_list(conn, self.miners)
 		self.miners.append(int(port))
 		self.socket_dict[port] = conn
+=======
+        Args:
+            conn (socket): socket of the current connection
+            port (int): port received
+        """
+        self.send_my_list(conn, self.node, port)
+        self.node.append(int(port))
+        self.socket_dict[port] = conn
+>>>>>>> master:tps/miner_tp/node_class.py
 
 	def my_tab_msg(self, list):
 		"""my_tab_msg
 
+<<<<<<< HEAD:tps/miner_tp/miner_class.py
 		Args:
 			list (list): list of unknown miners to connect
 		"""
@@ -90,6 +124,27 @@ class Miner:
 
 	def wallet_login(self, addr):
 		self.wallets.append(addr)
+=======
+        Args:
+            list (list): list of unknown miners to connect
+        """
+        miners_to_connect = []
+        for i in range(len(list)):
+            if not int(list[i]) in self.node:
+                print(f"Adding {int(list[i])} to connect")
+                miners_to_connect.append(int(list[i]))
+        for miner in miners_to_connect:
+            self.connect("localhost", miner)
+    
+    def logout_miner(self,port):
+        """logout_miner : remove the miner that just logged out
+
+        Args:
+            port (str): port of the loogged out miner
+        """
+        self.node.remove(int(port))
+        del self.socket_dict[port]
+>>>>>>> master:tps/miner_tp/node_class.py
 
 	def broadcast(self, msg):
 		packed_msg = pickle.dumps(msg)
@@ -99,6 +154,7 @@ class Miner:
 	def msg_analysis(self, conn, msg):
 		"""msg_analysis
 
+<<<<<<< HEAD:tps/miner_tp/miner_class.py
 		Args:
 			conn (socket): socket of the current connection
 			msg (array of strings): array of words of the msg received
@@ -125,6 +181,12 @@ class Miner:
 		else:
 			print(msg)
 		self.print_miner_info()
+=======
+    def broadcast(self, msg):
+        packed_msg = pickle.dumps(msg)
+        for port in self.node:
+            self.socket_dict[str(port)].send(packed_msg)
+>>>>>>> master:tps/miner_tp/node_class.py
 
 	def handle_miner(self, conn):
 		"""handle_miner
@@ -168,6 +230,7 @@ class Miner:
 	def connect(self, host, port):
 		"""connect
 
+<<<<<<< HEAD:tps/miner_tp/miner_class.py
 		Args:
 			host (string): ip address of the remote target  
 			port (int): listening port of the remote target
@@ -182,3 +245,30 @@ class Miner:
 		self.send_port(sock_emit_conn, my_port)
 		thread_miner = threading.Thread(target=self.handle_miner, args=(sock_emit_conn,), daemon=True)
 		thread_miner.start()
+=======
+        Args:
+            conn (socket): socket of the current connection
+            port (int): port to send
+        """
+        data = "/port " + str(sender)
+        msg_to_send = Message(sender, recipient, data)
+        print(msg_to_send)
+        pack_msg = pickle.dumps(msg_to_send)
+        conn.send(pack_msg)
+
+    def connect(self, host, port):
+        """connect : function to connect to a miner
+
+        Args:
+            host (string): ip address of the remote target  
+            port (int): listening port of the remote target
+        """
+        sock_emit_conn = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
+        sock_emit_conn.connect((host, port))
+        self.node.append(port)
+        self.socket_dict[str(port)] = sock_emit_conn
+        my_addr, my_port = self.sock_recv_conn.getsockname()
+        self.send_port(sock_emit_conn, my_port, port)
+        thread_miner = threading.Thread(target=self.handle_conn, args=(sock_emit_conn,), daemon=True)
+        thread_miner.start()
+>>>>>>> master:tps/miner_tp/node_class.py
