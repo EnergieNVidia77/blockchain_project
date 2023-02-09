@@ -10,7 +10,7 @@ import pickle
 import time
 from message_class import Message
 
-class Miner:
+class Node:
 
     def __init__(self, host, port):
         """__init__ : creates a miner object
@@ -24,14 +24,14 @@ class Miner:
         self.sock_recv_conn.bind((host, port))
         self.sock_recv_conn.listen()
         print(f"Listening on {port}")
-        self.miners = []
+        self.node = []
         self.socket_dict = {}
         self.wallets = []
 
     def print_miner_info(self):
         """print_miner_info : show some info about the miner
         """
-        print(f"Known miner {self.miners}")
+        print(f"Known miner {self.node}")
         print(f"My wallets: {self.wallets}")
         print("My sockets:")
         print(self.socket_dict)
@@ -70,8 +70,8 @@ class Miner:
             conn (socket): socket of the current connection
             port (int): port received
         """
-        self.send_my_list(conn, self.miners, port)
-        self.miners.append(int(port))
+        self.send_my_list(conn, self.node, port)
+        self.node.append(int(port))
         self.socket_dict[port] = conn
 
     def my_tab_msg(self, list):
@@ -82,7 +82,7 @@ class Miner:
         """
         miners_to_connect = []
         for i in range(len(list)):
-            if not int(list[i]) in self.miners:
+            if not int(list[i]) in self.node:
                 print(f"Adding {int(list[i])} to connect")
                 miners_to_connect.append(int(list[i]))
         for miner in miners_to_connect:
@@ -94,7 +94,7 @@ class Miner:
         Args:
             port (str): port of the loogged out miner
         """
-        self.miners.remove(int(port))
+        self.node.remove(int(port))
         del self.socket_dict[port]
 
     def wallet_login(self, port):
@@ -108,7 +108,7 @@ class Miner:
 
     def broadcast(self, msg):
         packed_msg = pickle.dumps(msg)
-        for port in self.miners:
+        for port in self.node:
             self.socket_dict[str(port)].send(packed_msg)
 
     def msg_analysis(self, conn, msg):
@@ -184,7 +184,7 @@ class Miner:
         """
         sock_emit_conn = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
         sock_emit_conn.connect((host, port))
-        self.miners.append(port)
+        self.node.append(port)
         self.socket_dict[str(port)] = sock_emit_conn
         my_addr, my_port = self.sock_recv_conn.getsockname()
         self.send_port(sock_emit_conn, my_port, port)
