@@ -40,7 +40,7 @@ class Wallet:
 				print("No data or connection lost")
 				return 
 			recv_msg = pickle.loads(packed_recv_msg)
-			print(f"I received {recv_msg}")
+			print(f"{recv_msg}")
 			self.msg_analysis(recv_msg)
 		
 	def msg_analysis(self, msg):
