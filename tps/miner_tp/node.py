@@ -22,6 +22,8 @@ try :
 except IndexError:
     print("No target ip or port specified")
 
+node.print_node_info()
+
 while True:
     cmd = input()
     if cmd == 'exit':
