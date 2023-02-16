@@ -53,6 +53,7 @@ def printArbre(t):
         return ""
     else :
         return f"{t.value}[{printArbre(t.nextL)}, {printArbre(t.nextR)}]"
+
 #Crée l'arbre de merkel associé a la liste LV passer en parametre
 def makeMerkel(LV):
     size = len(LV)
