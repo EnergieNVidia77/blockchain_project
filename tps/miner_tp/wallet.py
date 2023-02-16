@@ -1,12 +1,12 @@
-import wallet_class as wc
+from wallet_class import Wallet
 import sys
 
 my_ip = sys.argv[1]
 my_port = int(sys.argv[2])
-miner_port = int(sys.argv[3])
+node_port = int(sys.argv[3])
 
+wall = Wallet(my_ip, my_port, node_port)
 
-wall = wc.Wallet(my_ip, my_port, miner_port)
 while True :
 	msg = input()
 	msg_array = msg.split()

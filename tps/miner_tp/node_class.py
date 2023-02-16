@@ -1,5 +1,5 @@
 """
-@file miner_class.py
+@file node_class.py
 @author Toufic Talha
 @date 2023-01-21
 """
@@ -13,10 +13,10 @@ from message_class import Message
 class Node:
 
     def __init__(self, host, port):
-        """__init__ : creates a miner object
+        """__init__ : creates a node object
         Args:
-            host (string): ip address of the miner
-            port (int): listening port of the miner
+            host (string): ip address of the node
+            port (int): listening port of the node
         """
         self.sock_recv_conn = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
         self.sock_recv_conn.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -27,16 +27,15 @@ class Node:
         self.socket_dict = {}
         self.wallets = []
 
-    def print_miner_info(self):
-        """print_miner_info : show some info about the miner
+    def print_node_info(self):
+        """print_node_info : show some info about the node
         """
-        print(f"Known miner {self.nodes}")
+        print(f"Known node {self.nodes}")
         print(f"My wallets: {self.wallets}")
-        print("My sockets:")
-        print(self.socket_dict)
+        print(f"My sockets: {self.socket_dict}")
 
     def close_connections(self):
-        """close_connections : close all the connection with other miners
+        """close_connections : close all the connection with other nodes
         """
         addr, sender = self.sock_recv_conn.getsockname()
         data = "/logout " + str(sender)
@@ -47,7 +46,7 @@ class Node:
             self.socket_dict[destPort].close()
 
     def send_my_list(self, conn, list, recipient):
-        """send_my_list : sends the list of all know miners to the newly connected miner
+        """send_my_list : sends the list of all know nodes to the newly connected node
         Args:
             conn (socket): socket of the current connection
             list (list): list to send
@@ -62,7 +61,7 @@ class Node:
         conn.send(packed_msg)
 
     def port_msg(self, conn, port):
-        """port_msg : add the newly connected miner to the know miner list 
+        """port_msg : add the newly connected node to the know node list 
         Args:
             conn (socket): socket of the current connection
             port (int): port received
@@ -72,22 +71,22 @@ class Node:
         self.socket_dict[port] = conn
 
     def my_tab_msg(self, list):
-        """my_tab_msg : connect to all the miners that the miner I connected sent me
+        """my_tab_msg : connect to all the nodes that the node I connected sent me
         Args:
-            list (list): list of unknown miners to connect
+            list (list): list of unknown nodes to connect
         """
-        miners_to_connect = []
+        nodes_to_connect = []
         for i in range(len(list)):
             if not int(list[i]) in self.nodes:
                 print(f"Adding {int(list[i])} to connect")
-                miners_to_connect.append(int(list[i]))
-        for miner in miners_to_connect:
-            self.connect("localhost", miner)
+                nodes_to_connect.append(int(list[i]))
+        for node in nodes_to_connect:
+            self.connect("localhost", node)
     
-    def logout_miner(self,port):
-        """logout_miner : remove the miner that just logged out
+    def logout_node(self,port):
+        """logout_node : remove the node that just logged out
         Args:
-            port (str): port of the loogged out miner
+            port (str): port of the loogged out node
         """
         self.nodes.remove(int(port))
         del self.socket_dict[port]
@@ -98,9 +97,14 @@ class Node:
             port (str): port of the wallet
         """
         self.wallets.append(int(port))
-        self.print_miner_info()
+        self.print_node_info()
 
     def broadcast(self, msg):
+        """broacast : broadcast a wallet to the network
+
+        Args:
+            msg (): _description_
+        """
         packed_msg = pickle.dumps(msg)
         for port in self.nodes:
             self.socket_dict[str(port)].send(packed_msg)
@@ -123,7 +127,7 @@ class Node:
                         list.append(data[i])
                     self.my_tab_msg(list)
                 elif data[0] == "/logout":
-                    self.logout_miner(data[1])
+                    self.logout_node(data[1])
                 elif data[0] == "/wallet_login":
                     self.wallet_login(msg.get_sender())
                     data = "/sucess_log"
@@ -153,11 +157,11 @@ class Node:
             conn, addr =  self.sock_recv_conn.accept()
             #self.nb_recv_conn += 1
             #print(f"Connected with {addr}")
-            thread_miner = threading.Thread(target=self.handle_conn, args=(conn,), daemon=True)
-            thread_miner.start()
+            thread_node = threading.Thread(target=self.handle_conn, args=(conn,), daemon=True)
+            thread_node.start()
     
     def send_port(self, conn, sender, recipient):
-        """send_port : send the /port command to the miner I connected to
+        """send_port : send the /port command to the node I connected to
         Args:
             conn (socket): socket of the current connection
             port (int): port to send
@@ -169,7 +173,7 @@ class Node:
         conn.send(pack_msg)
 
     def connect(self, host, port):
-        """connect : function to connect to a miner
+        """connect : function to connect to a node
         Args:
             host (string): ip address of the remote target  
             port (int): listening port of the remote target
@@ -180,5 +184,5 @@ class Node:
         self.socket_dict[str(port)] = sock_emit_conn
         my_addr, my_port = self.sock_recv_conn.getsockname()
         self.send_port(sock_emit_conn, my_port, port)
-        thread_miner = threading.Thread(target=self.handle_conn, args=(sock_emit_conn,), daemon=True)
-        thread_miner.start()
+        thread_node = threading.Thread(target=self.handle_conn, args=(sock_emit_conn,), daemon=True)
+        thread_node.start()

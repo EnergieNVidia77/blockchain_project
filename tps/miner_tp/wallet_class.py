@@ -6,38 +6,36 @@ from message_class import Message
 
 class Wallet:
 
-	def __init__(self, address, port, Mport):
+	def __init__(self, address, port, node_port):
 		#balance (default 100)
 		self.balance = 100
-		#miner
-		self.miner = Mport
-		# adress
-		self.address = address
+		#node
+		self.node = node_port
+		#my port
+		self.port = port
 		#socket
 		self.sock_emit_conn = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
-		self.sock_emit_conn.connect((address, Mport))
-		print(f"Connected to {Mport}")
-		print(f"emit socket : {self.sock_emit_conn}")
-		msg_to_miner = "/wallet_login"
-		message = Message(port, Mport, msg_to_miner)
+		self.sock_emit_conn.connect((address, node_port))
+		print(f"Connected to {node_port}")
+		msg_to_node = "/wallet_login"
+		message = Message(port, node_port, msg_to_node)
 		pack_msg = pickle.dumps(message)
 		self.sock_emit_conn.send(pack_msg)
 		self.handle_connection(self.sock_emit_conn)
 
-	def handle_connection(self, con):
-		rcv_th = threading.Thread(target=self.rcv_transaction, args=(con,), daemon=True)
+	def handle_connection(self, conn):
+		rcv_th = threading.Thread(target=self.rcv_transaction, args=(conn,), daemon=True)
 		rcv_th.start()
 
 	def send_transaction(self, transaction):
 			data = transaction.split()
-			msg = Message(self.adress, data[1], data[2])
+			msg = Message(self.port, data[1], data[2])
 			msg = pickle.dumps(msg)	
 			self.sock_emit_conn.send(msg)
 
 	def rcv_transaction(self, conn):
 		while True:
 			packed_recv_msg = conn.recv(1024)
-			print(f"msg {packed_recv_msg}")
 			if not packed_recv_msg:
 				print("No data or connection lost")
 				return 
@@ -46,10 +44,7 @@ class Wallet:
 			self.msg_analysis(recv_msg)
 		
 	def msg_analysis(self, msg):
-		print(type(msg))
-		print(msg)
 		payload = msg.get_payload()
 		data = payload.split()
-		if data[0] == "/success":
-			amount = int(msg[1])
-			self.balance -= amount
+		if data[0] == "/sucess_log":
+			print("Sucessfully connected to network")
