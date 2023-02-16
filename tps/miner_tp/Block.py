@@ -4,11 +4,12 @@ class Block():
         self.previous_block_hash = previous_block_hash
         self.ounce = ounce
         self.transactions = transactions
+        self.hashList = [transaction.get_hash() for transaction in self.transactions]
+        self.header = mC.makeMerkel(self.hashList)
+
     #revoir l'arbre de merkel cree a partir de la liste de hash des transaction
     def get_header(self):
-        hashList = [transaction.get_hash() for transaction in self.transactions]
-        res = mC.makeMerkel(hashList)
-        return res
+        return self.header
     
     def __str__(self):
         res = 20*"-"+"\n"
