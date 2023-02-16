@@ -3,10 +3,24 @@ import socket
 import pickle
 import time
 from message_class import Message
+from transaction_class import Transaction
+
+import hashlib
+from random import randbytes
+
+import Crypto
+from Crypto.Cipher import PKCS1_OAEP
+from Crypto.PublicKey import RSA
+from Crypto import Random
+
+import base58
 
 class Wallet:
 
 	def __init__(self, address, port, node_port):
+		#bitcoin address
+		self.bitaddress = self.gen_bitcoin_address()
+		print(self.bitaddress)
 		#balance (default 100)
 		self.balance = 100
 		#node
@@ -23,15 +37,36 @@ class Wallet:
 		self.sock_emit_conn.send(pack_msg)
 		self.handle_connection(self.sock_emit_conn)
 
+	def gen_bitcoin_address(self):
+		#generate key
+		key = RSA.generate(1024) #generate public and private keys
+		publickey = key.publickey()
+		encryptor = PKCS1_OAEP.new(publickey)
+		encrypted = encryptor.encrypt(randbytes(4))
+		print(f"encrypted {encrypted}")
+		#generate bitcoin address
+		bitaddress = hashlib.sha256(encrypted).hexdigest()
+		print(f"hash256 {bitaddress}")
+		#bitaddress = hashlib.ripemd160(bitaddress.encode('utf-8')).hexdigest()
+		#add prefix
+		bitaddress = "0x00" + bitaddress
+		#change encoding
+		bitaddress = base58.b58encode(bitaddress)
+		return bitaddress
+
 	def handle_connection(self, conn):
 		rcv_th = threading.Thread(target=self.rcv_transaction, args=(conn,), daemon=True)
 		rcv_th.start()
 
-	def send_transaction(self, transaction):
-			data = transaction.split()
-			msg = Message(self.port, data[1], data[2])
-			msg = pickle.dumps(msg)	
-			self.sock_emit_conn.send(msg)
+	def send_transaction(self, operation):
+		"""
+		/transaction portreceiver bitaddressreceiver amoutnt
+		"""
+		data = operation.split()
+		transaction = Transaction(self.bitaddress, data[2], data[3])
+		msg = Message(self.port, data[1], transaction)
+		msg = pickle.dumps(msg)	
+		self.sock_emit_conn.send(msg)
 
 	def rcv_transaction(self, conn):
 		while True:
