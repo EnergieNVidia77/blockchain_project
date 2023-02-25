@@ -31,8 +31,8 @@ class Wallet:
 		self.sock_emit_conn = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
 		self.sock_emit_conn.connect((address, node_port))
 		print(f"Connected to {node_port}")
-		msg_to_node = "/wallet_login"
-		message = Message(port, node_port, msg_to_node)
+		msg_to_node = "/wallet_login " + self.bitaddress
+		message = Message(port, self.port, msg_to_node)
 		pack_msg = pickle.dumps(message)
 		self.sock_emit_conn.send(pack_msg)
 		self.handle_connection(self.sock_emit_conn)
