@@ -25,7 +25,7 @@ class Node:
         print(f"Listening on {port}")
         self.nodes = []
         self.socket_dict = {}
-        self.wallets = []
+        self.wallets = {}
 
     def print_node_info(self):
         """print_node_info : show some info about the node
@@ -91,12 +91,12 @@ class Node:
         self.nodes.remove(int(port))
         del self.socket_dict[port]
 
-    def wallet_login(self, port):
+    def wallet_login(self, bitcoin_addr, port):
         """wallet_login : register a new wallet
         Args:
             port (str): port of the wallet
         """
-        self.wallets.append(int(port))
+        self.wallets[bitcoin_addr] = port
         self.print_node_info()
 
     def broadcast(self, msg):
@@ -129,7 +129,8 @@ class Node:
                 elif data[0] == "/logout":
                     self.logout_node(data[1])
                 elif data[0] == "/wallet_login":
-                    self.wallet_login(msg.get_sender())
+                    bitcoin_addr = data[1]
+                    self.wallet_login(bitcoin_addr, msg.get_sender())
                     data = "/sucess_log"
                     addr, port = self.sock_recv_conn.getsockname()
                     my_msg = Message(port, msg.get_sender(), data)
