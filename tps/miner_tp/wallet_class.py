@@ -28,10 +28,10 @@ class Wallet:
 		rcv_th.start()
 
 	def send_transaction(self, transaction):
-			data = transaction.split()
-			msg = Message(self.port, data[1], data[2])
-			msg = pickle.dumps(msg)	
-			self.sock_emit_conn.send(msg)
+		data = transaction.split()
+		msg = Message(self.port, data[1], data[2])
+		msg = pickle.dumps(msg)	
+		self.sock_emit_conn.send(msg)
 
 	def rcv_transaction(self, conn):
 		while True:
