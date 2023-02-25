@@ -60,13 +60,13 @@ class Wallet:
 
 	def send_transaction(self, operation):
 		"""
-		/transaction portreceiver bitaddressreceiver amoutnt
+		/transaction bitaddressreceiver amoutnt
 		"""
 		data = operation.split()
-		transaction = Transaction(self.bitaddress, data[2], data[3])
-		msg = Message(self.port, data[1], transaction)
-		msg = pickle.dumps(msg)	
-		self.sock_emit_conn.send(msg)
+		if int(data[2]) <= self.balance:
+			transaction = Transaction(self.bitaddress, data[1], data[2])
+			msg = pickle.dumps(transaction)	
+			self.sock_emit_conn.send(msg)
 
 	def rcv_transaction(self, conn):
 		while True:
