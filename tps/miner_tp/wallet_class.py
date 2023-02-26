@@ -4,6 +4,13 @@ import pickle
 import time
 from message_class import Message
 
+import ecdsa
+from ripemd import ripemd160
+import hashlib
+import binascii
+import base58
+
+
 class Wallet:
 
 	def __init__(self, address, port, node_port):
@@ -14,10 +21,11 @@ class Wallet:
 		#my port
 		self.port = port
 		#socket
+		self.bitcoin_addr = self.gen_addr()
 		self.sock_emit_conn = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
 		self.sock_emit_conn.connect((address, node_port))
 		print(f"Connected to {node_port}")
-		msg_to_node = "/wallet_login"
+		msg_to_node = "/wallet_login " + self.bitcoin_addr.decode()
 		message = Message(port, node_port, msg_to_node)
 		pack_msg = pickle.dumps(message)
 		self.sock_emit_conn.send(pack_msg)
@@ -48,3 +56,26 @@ class Wallet:
 		data = payload.split()
 		if data[0] == "/sucess_log":
 			print("Sucessfully connected to network")
+
+	def gen_addr(self):
+		ecdsaPrivateKey = ecdsa.SigningKey.generate(curve=ecdsa.SECP256k1)
+		print("ECDSA Private Key: ", ecdsaPrivateKey.to_string().hex())
+		ecdsaPublicKey = '04' +  ecdsaPrivateKey.get_verifying_key().to_string().hex()
+		print("ECDSA Public Key: ", ecdsaPublicKey)
+		hash256FromECDSAPublicKey = hashlib.sha256(binascii.unhexlify(ecdsaPublicKey)).hexdigest()
+		print("SHA256(ECDSA Public Key): ", hash256FromECDSAPublicKey)
+		ripemd160FromHash256 = hashlib.new('ripemd160', binascii.unhexlify(hash256FromECDSAPublicKey))
+		print("RIPEMD160(SHA256(ECDSA Public Key)): ", ripemd160FromHash256.hexdigest())
+		prependNetworkByte = '00' + ripemd160FromHash256.hexdigest()
+		print("Prepend Network Byte to RIDEMP160(SHA256(ECDSA Public Key)): ", prependNetworkByte)
+		hash = prependNetworkByte
+		for x in range(1,3):
+			hash = hashlib.sha256(binascii.unhexlify(hash)).hexdigest()
+			print("\t|___>SHA256 #", x, " : ", hash)
+		cheksum = hash[:8]
+		print("Checksum(first 4 bytes): ", cheksum)
+		appendChecksum = prependNetworkByte + cheksum
+		print("Append Checksum to RIDEMP160(SHA256(ECDSA Public Key)): ", appendChecksum)
+		bitcoinAddress = base58.b58encode(binascii.unhexlify(appendChecksum))
+		print("Bitcoin Address: ", bitcoinAddress.decode('utf8'), " ", len(bitcoinAddress))
+		return bitcoinAddress
