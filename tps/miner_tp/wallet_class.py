@@ -37,7 +37,6 @@ class Wallet:
 		#my port
 		self.port = port
 		#socket
-		self.bitcoin_addr = self.gen_addr()
 		self.sock_emit_conn = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
 		self.sock_emit_conn.connect((address, node_port))
 		print(f"Connected to {node_port}")
