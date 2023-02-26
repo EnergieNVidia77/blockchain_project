@@ -29,5 +29,4 @@ class Transaction:
         res+=f"Transaction from {self.sender} to {self.recipient} at {self.formatted_time()}\n"
         res+=f"Amount: {self.amount}\n"
         res+=20*"-"
-
         return res

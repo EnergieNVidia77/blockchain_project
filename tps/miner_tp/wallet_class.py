@@ -17,6 +17,13 @@ import base58
 import ecdsa
 import binascii
 
+import ecdsa
+from ripemd import ripemd160
+import hashlib
+import binascii
+import base58
+
+
 class Wallet:
 
 	def __init__(self, address, port, node_port):
@@ -30,6 +37,7 @@ class Wallet:
 		#my port
 		self.port = port
 		#socket
+		self.bitcoin_addr = self.gen_addr()
 		self.sock_emit_conn = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
 		self.sock_emit_conn.connect((address, node_port))
 		print(f"Connected to {node_port}")
@@ -92,3 +100,4 @@ class Wallet:
 		data = payload.split()
 		if data[0] == "/sucess_log":
 			print("Sucessfully connected to network")
+
