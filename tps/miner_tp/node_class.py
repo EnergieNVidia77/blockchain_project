@@ -130,7 +130,7 @@ class Node:
                     self.logout_node(data[1])
                 elif data[0] == "/wallet_login":
                     bitcoin_addr = data[1]
-                    self.wallet_login(bitcoin_addr, msg.get_sender())
+                    self.wallet_login(bitcoin_addr, conn)
                     data = "/sucess_log"
                     addr, port = self.sock_recv_conn.getsockname()
                     my_msg = Message(port, msg.get_sender(), data)
