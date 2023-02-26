@@ -14,12 +14,14 @@ from Crypto.PublicKey import RSA
 from Crypto import Random
 
 import base58
+import ecdsa
+import binascii
 
 class Wallet:
 
 	def __init__(self, address, port, node_port):
 		#bitcoin address
-		self.bitaddress = self.gen_bitcoin_address()
+		self.bitaddress = self.gen_addr()
 		print(self.bitaddress)
 		#balance (default 100)
 		self.balance = 100
@@ -31,28 +33,35 @@ class Wallet:
 		self.sock_emit_conn = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
 		self.sock_emit_conn.connect((address, node_port))
 		print(f"Connected to {node_port}")
-		msg_to_node = "/wallet_login " + self.bitaddress
+		msg_to_node = "/wallet_login " + self.bitaddress.decode()
 		message = Message(port, self.port, msg_to_node)
 		pack_msg = pickle.dumps(message)
 		self.sock_emit_conn.send(pack_msg)
 		self.handle_connection(self.sock_emit_conn)
 
-	def gen_bitcoin_address(self):
-		#generate key
-		key = RSA.generate(1024) #generate public and private keys
-		publickey = key.publickey()
-		encryptor = PKCS1_OAEP.new(publickey)
-		encrypted = encryptor.encrypt(randbytes(4))
-		print(f"encrypted {encrypted}")
-		#generate bitcoin address
-		bitaddress = hashlib.sha256(encrypted).hexdigest()
-		print(f"hash256 {bitaddress}")
-		#bitaddress = hashlib.ripemd160(bitaddress.encode('utf-8')).hexdigest()
-		#add prefix
-		bitaddress = "0x00" + bitaddress
-		#change encoding
-		bitaddress = base58.b58encode(bitaddress)
-		return bitaddress
+	def gen_addr(self):
+		ecdsaPrivateKey = ecdsa.SigningKey.generate(curve=ecdsa.SECP256k1)
+		print("ECDSA Private Key: ", ecdsaPrivateKey.to_string().hex())
+		ecdsaPublicKey = '04' +  ecdsaPrivateKey.get_verifying_key().to_string().hex()
+		print("ECDSA Public Key: ", ecdsaPublicKey)
+		hash256FromECDSAPublicKey = hashlib.sha256(binascii.unhexlify(ecdsaPublicKey)).hexdigest()
+		print("SHA256(ECDSA Public Key): ", hash256FromECDSAPublicKey)
+		ripemd160FromHash256 = hashlib.new('ripemd160', binascii.unhexlify(hash256FromECDSAPublicKey))
+		print("RIPEMD160(SHA256(ECDSA Public Key)): ", ripemd160FromHash256.hexdigest())
+		prependNetworkByte = '00' + ripemd160FromHash256.hexdigest()
+		print("Prepend Network Byte to RIDEMP160(SHA256(ECDSA Public Key)): ", prependNetworkByte)
+		hash = prependNetworkByte
+		for x in range(1,3):
+		    hash = hashlib.sha256(binascii.unhexlify(hash)).hexdigest()
+		    print("\t|___>SHA256 #", x, " : ", hash)
+		cheksum = hash[:8]
+		print("Checksum(first 4 bytes): ", cheksum)
+		appendChecksum = prependNetworkByte + cheksum
+		print("Append Checksum to RIDEMP160(SHA256(ECDSA Public Key)): ", appendChecksum)
+		bitcoinAddress = base58.b58encode(binascii.unhexlify(appendChecksum))
+		print("Bitcoin Address: ", bitcoinAddress.decode('utf8'), " ", len(bitcoinAddress))
+		return bitcoinAddress
+
 
 	def handle_connection(self, conn):
 		rcv_th = threading.Thread(target=self.rcv_transaction, args=(conn,), daemon=True)
