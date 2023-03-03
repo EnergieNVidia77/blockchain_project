@@ -3,6 +3,13 @@ import socket
 import pickle
 import time
 from message_class import Message
+from transaction_class import Transaction
+
+import hashlib
+
+import base58
+import ecdsa
+import binascii
 
 import ecdsa
 from ripemd import ripemd160
@@ -14,6 +21,9 @@ import base58
 class Wallet:
 
 	def __init__(self, address, port, node_port):
+		#bitcoin address
+		self.bitaddress = self.gen_addr()
+		print(self.bitaddress)
 		#balance (default 100)
 		self.balance = 100
 		self.node = node_port
@@ -28,15 +38,45 @@ class Wallet:
 		self.sock_emit_conn.send(pack_msg)
 		self.handle_connection(self.sock_emit_conn)
 
+	def gen_addr(self):
+		ecdsaPrivateKey = ecdsa.SigningKey.generate(curve=ecdsa.SECP256k1)
+		self.private_key = ecdsaPrivateKey
+		#print("ECDSA Private Key: ", ecdsaPrivateKey.to_string().hex())
+		ecdsaPublicKey = '04' +  ecdsaPrivateKey.get_verifying_key().to_string().hex()
+		self.public_key = ecdsaPublicKey
+		#print("ECDSA Public Key: ", ecdsaPublicKey)
+		hash256FromECDSAPublicKey = hashlib.sha256(binascii.unhexlify(ecdsaPublicKey)).hexdigest()
+		#print("SHA256(ECDSA Public Key): ", hash256FromECDSAPublicKey)
+		ripemd160FromHash256 = hashlib.new('ripemd160', binascii.unhexlify(hash256FromECDSAPublicKey))
+		#print("RIPEMD160(SHA256(ECDSA Public Key)): ", ripemd160FromHash256.hexdigest())
+		prependNetworkByte = '00' + ripemd160FromHash256.hexdigest()
+		#print("Prepend Network Byte to RIDEMP160(SHA256(ECDSA Public Key)): ", prependNetworkByte)
+		hash = prependNetworkByte
+		for x in range(1,3):
+			hash = hashlib.sha256(binascii.unhexlify(hash)).hexdigest()
+			print("\t|___>SHA256 #", x, " : ", hash)
+		cheksum = hash[:8]
+		#print("Checksum(first 4 bytes): ", cheksum)
+		appendChecksum = prependNetworkByte + cheksum
+		#print("Append Checksum to RIDEMP160(SHA256(ECDSA Public Key)): ", appendChecksum)
+		bitcoinAddress = base58.b58encode(binascii.unhexlify(appendChecksum))
+		#print("Bitcoin Address: ", bitcoinAddress.decode('utf8'), " ", len(bitcoinAddress))
+		return bitcoinAddress
+
+
 	def handle_connection(self, conn):
 		rcv_th = threading.Thread(target=self.rcv_transaction, args=(conn,), daemon=True)
 		rcv_th.start()
 
-	def send_transaction(self, transaction):
-		data = transaction.split()
-		msg = Message(self.port, data[1], data[2])
-		msg = pickle.dumps(msg)	
-		self.sock_emit_conn.send(msg)
+	def send_transaction(self, operation):
+		"""
+		/transaction bitaddressreceiver amoutnt
+		"""
+		data = operation.split()
+		if int(data[2]) <= self.balance:
+			transaction = Transaction(self.bitaddress, data[1], data[2])
+			msg = pickle.dumps(transaction)	
+			self.sock_emit_conn.send(msg)
 
 	def rcv_transaction(self, conn):
 		while True:
