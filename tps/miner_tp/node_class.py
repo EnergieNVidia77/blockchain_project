@@ -23,27 +23,27 @@ class Node:
         self.sock_recv_conn.bind((host, port))
         self.sock_recv_conn.listen()
         print(f"Listening on {port}")
-        self.nodes = []
-        self.socket_dict = {}
+        self.nodes_ports = []
+        self.nodes_socket_dict = {}
         self.wallets = {}
 
     def print_node_info(self):
         """print_node_info : show some info about the node
         """
-        print(f"Known node {self.nodes}")
+        print(f"Known node {self.nodes_ports}")
         print(f"My wallets: {self.wallets}")
-        print(f"My sockets: {self.socket_dict}")
+        print(f"My socket dictionnary: {self.nodes_socket_dict}")
 
     def close_connections(self):
         """close_connections : close all the connection with other nodes
         """
         addr, sender = self.sock_recv_conn.getsockname()
         data = "/logout " + str(sender)
-        for destPort in self.socket_dict:
+        for destPort in self.nodes_socket_dict:
             msg = Message(sender, destPort, data)
-            self.socket_dict[destPort].send(pickle.dumps(msg))
-            self.socket_dict[destPort].shutdown(socket.SHUT_RDWR)
-            self.socket_dict[destPort].close()
+            self.nodes_socket_dict[destPort].send(pickle.dumps(msg))
+            self.nodes_socket_dict[destPort].shutdown(socket.SHUT_RDWR)
+            self.nodes_socket_dict[destPort].close()
 
     def send_my_list(self, conn, list, recipient):
         """send_my_list : sends the list of all know nodes to the newly connected node
@@ -66,18 +66,18 @@ class Node:
             conn (socket): socket of the current connection
             port (int): port received
         """
-        self.send_my_list(conn, self.nodes, port)
-        self.nodes.append(int(port))
-        self.socket_dict[port] = conn
+        self.send_my_list(conn, self.nodes_ports, port)
+        self.nodes_ports.append(int(port))
+        self.nodes_socket_dict[port] = conn
 
     def my_tab_msg(self, list):
-        """my_tab_msg : connect to all the nodes that the node I connected sent me
+        """my_tab_msg : connect to all the nodes that the node I connected to sent me
         Args:
             list (list): list of unknown nodes to connect
         """
         nodes_to_connect = []
         for i in range(len(list)):
-            if not int(list[i]) in self.nodes:
+            if not int(list[i]) in self.nodes_ports:
                 print(f"Adding {int(list[i])} to connect")
                 nodes_to_connect.append(int(list[i]))
         for node in nodes_to_connect:
@@ -88,8 +88,8 @@ class Node:
         Args:
             port (str): port of the loogged out node
         """
-        self.nodes.remove(int(port))
-        del self.socket_dict[port]
+        self.nodes_ports.remove(int(port))
+        del self.nodes_socket_dict[port]
 
     def wallet_login(self, bitcoin_addr, port):
         """wallet_login : register a new wallet
@@ -97,17 +97,18 @@ class Node:
             port (str): port of the wallet
         """
         self.wallets[bitcoin_addr] = port
-        self.print_node_info()
 
     def broadcast(self, msg):
         """broacast : broadcast a wallet to the network
 
         Args:
-            msg (): _description_
+            msg (any type): message to broadcast
         """
-        packed_msg = pickle.dumps(msg)
-        for port in self.nodes:
-            self.socket_dict[str(port)].send(packed_msg)
+        my_addr, my_port = self.sock_recv_conn.getsockname()
+        for port in self.nodes_ports:
+            payload = Message(my_port, port, msg)
+            packed_msg = pickle.dumps(payload)
+            self.nodes_socket_dict[str(port)].send(packed_msg)
 
     def msg_analysis(self, conn, msg):
         """msg_analysis : analyze the incomming message
@@ -135,6 +136,17 @@ class Node:
                     addr, port = self.sock_recv_conn.getsockname()
                     my_msg = Message(port, msg.get_sender(), data)
                     conn.send(pickle.dumps(my_msg))
+                else:
+                    print(data)
+            case bytes():
+                bitcoin_addr = payload
+                self.wallet_login(bitcoin_addr, conn)
+                data = "/sucess_log"
+                addr, port = self.sock_recv_conn.getsockname()
+                my_msg = Message(port, msg.get_sender(), data)
+                conn.send(pickle.dumps(my_msg))
+
+
 
     def handle_conn(self, conn):
         """handle_conn : function to handle a connection
@@ -181,8 +193,8 @@ class Node:
         """
         sock_emit_conn = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
         sock_emit_conn.connect((host, port))
-        self.nodes.append(port)
-        self.socket_dict[str(port)] = sock_emit_conn
+        self.nodes_ports.append(port)
+        self.nodes_socket_dict[str(port)] = sock_emit_conn
         my_addr, my_port = self.sock_recv_conn.getsockname()
         self.send_port(sock_emit_conn, my_port, port)
         thread_node = threading.Thread(target=self.handle_conn, args=(sock_emit_conn,), daemon=True)
