@@ -6,12 +6,15 @@
 
 import sys
 import threading
+from blockchain_class import Blockchain
 from miner_class import Miner
 
 my_ip = sys.argv[1]
 my_port = int(sys.argv[2])
 
-miner = Miner(my_ip, my_port)
+blockchain = Blockchain()
+
+miner = Miner(my_ip, my_port, blockchain)
 receive_thread = threading.Thread(target=miner.receive, daemon=True)
 receive_thread.start()
 
@@ -22,9 +25,13 @@ try :
 except IndexError:
     print("No target ip or port specified")
 
+miner.print_node_info()
+
 while True:
     cmd = input()
     if cmd == 'exit':
         miner.close_connections()
         break
+    if cmd == 'info':
+        miner.print_node_info()
 

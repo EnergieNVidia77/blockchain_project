@@ -1,5 +1,8 @@
 import datetime
-
+"""
+A wrapper class to send message easily between nodes or nodes-wallet
+@author: port number of the sender
+"""
 class Message():
     def __init__(self,sender,recipient,payload):
         self.sender = sender
@@ -14,10 +17,10 @@ class Message():
     def get_recipient(self):
         return self.recipient
 
-    def get_payload():
+    def get_payload(self):
         return self.payload
 
-    def get_time():
+    def get_time(self):
         return self.sent_time
 
     def __equal__(self,other):
@@ -36,5 +39,4 @@ class Message():
         res+= f"Payload:\n"
         res+=str(self.payload)+"\n"
         res+=20*"-"
-
         return res
