@@ -8,3 +8,4 @@ class Miner(Node):
         self.blockchain = blockchain
         self.transactions = []
     
+    #TODO: Minage, MAJ blockchain, notifier wallet

@@ -93,3 +93,6 @@ class Wallet:
 		data = payload.split()
 		if data[0] == "/sucess_log":
 			print("Sucessfully connected to network")
+
+
+	#TODO: List header block, test d'appartenance transaction
