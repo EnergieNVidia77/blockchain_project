@@ -3,9 +3,9 @@ import hashlib
 import pickle
 
 class Block():
-    def __init__(self, nounce, transactions, previous_block_hash):
+    def __init__(self, nonce, transactions, previous_block_hash):
         self.previous_block_hash = previous_block_hash
-        self.nounce = nounce
+        self.nonce = nonce
         self.transactions = transactions
         self.hashList = [transaction.get_hash() for transaction in self.transactions]
         self.header = mC.makeMerkel(self.hashList)
@@ -19,7 +19,7 @@ class Block():
         res+="Block\n"
         res+=f"Hash of the previous block: {self.previous_block_hash}\n"
         res+=f"Hash of this block: {self.get_hash()}\n"
-        res+=f"nounce: {self.nounce}\n"
+        res+=f"nonce: {self.nonce}\n"
         res+=f"Number of transactions: {len(self.transactions)}\nList of transactions:\n"
 
         for t in self.transactions:
