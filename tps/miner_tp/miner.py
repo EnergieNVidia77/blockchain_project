@@ -32,6 +32,8 @@ while True:
     if cmd == 'exit':
         miner.close_connections()
         break
-    if cmd == 'info':
+    if cmd == 'node info':
         miner.print_node_info()
+    if cmd == 'miner info':
+        miner.print_miner_info()
 

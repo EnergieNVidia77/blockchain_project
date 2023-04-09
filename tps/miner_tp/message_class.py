@@ -38,5 +38,4 @@ class Message():
         res+= f"Message from {self.sender} to {self.recipient} at {self.formatted_time()}\n"
         res+= f"Payload:\n"
         res+=str(self.payload)+"\n"
-        res+=20*"-"
         return res

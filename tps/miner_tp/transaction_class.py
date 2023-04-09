@@ -7,7 +7,7 @@ class Transaction:
       self.sender = sender
       self.recipient = recipient
       self.amount = amount
-      self.transaction_time = datetime.datetime.now()
+      self.sent_time = datetime.datetime.now()
 
     def get_sender(self):
         return self.sender

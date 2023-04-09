@@ -1,5 +1,6 @@
 import merkel_class as mC
-
+import hashlib
+import pickle
 
 class Block():
     def __init__(self, nounce, transactions, previous_block_hash):
@@ -28,7 +29,8 @@ class Block():
 
     #revoie le hash du block
     def get_hash(self):
-        return hash(self)
+        bytes_block = pickle.dumps(self)
+        return hashlib.sha256(bytes_block)
 
     #return true si l'arbre contient des transaction faux sinon 
     def have_transactions(self):

@@ -22,13 +22,11 @@ class Wallet:
 
 	def __init__(self, address, port, node_port):
 		#bitcoin address
-		self.bitaddress = self.gen_addr()
-		print(self.bitaddress)
+		self.bitcoin_addr = self.gen_addr()
 		#balance (default 100)
 		self.balance = 100
 		self.node = node_port
 		self.port = port
-		self.bitcoin_addr = self.gen_addr()
 		print(f"My bitcoin addr: {self.bitcoin_addr}")
 		self.sock_emit_conn = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
 		self.sock_emit_conn.connect((address, node_port))
@@ -54,7 +52,7 @@ class Wallet:
 		hash = prependNetworkByte
 		for x in range(1,3):
 			hash = hashlib.sha256(binascii.unhexlify(hash)).hexdigest()
-			print("\t|___>SHA256 #", x, " : ", hash)
+			#print("\t|___>SHA256 #", x, " : ", hash)
 		cheksum = hash[:8]
 		#print("Checksum(first 4 bytes): ", cheksum)
 		appendChecksum = prependNetworkByte + cheksum
@@ -70,12 +68,13 @@ class Wallet:
 
 	def send_transaction(self, operation):
 		"""
-		/transaction bitaddressreceiver amoutnt
+		/transaction bitaddressreceiver amount
 		"""
 		data = operation.split()
 		if int(data[2]) <= self.balance:
-			transaction = Transaction(self.bitaddress, data[1], data[2])
-			msg = pickle.dumps(transaction)	
+			transaction = Transaction(self.bitcoin_addr, data[1], data[2])
+			msg_to_send = Message(self.bitcoin_addr, data[1], transaction)
+			msg = pickle.dumps(msg_to_send)	
 			self.sock_emit_conn.send(msg)
 
 	def rcv_transaction(self, conn):

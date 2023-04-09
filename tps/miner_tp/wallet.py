@@ -10,6 +10,8 @@ wall = Wallet(my_ip, my_port, node_port)
 while True :
 	msg = input()
 	msg_array = msg.split()
-	#/transac portreceiver bitaddressreceiver amount
+	"""
+	/transaction bitaddressreceiver amount
+	"""
 	if msg_array[0] == "/transac":
 		wall.send_transaction(msg)

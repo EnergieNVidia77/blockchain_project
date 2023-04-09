@@ -9,6 +9,7 @@ import socket
 import pickle
 import time
 from message_class import Message
+from transaction_class import Transaction
 
 class Node:
 
@@ -136,8 +137,6 @@ class Node:
                     addr, port = self.sock_recv_conn.getsockname()
                     my_msg = Message(port, msg.get_sender(), data)
                     conn.send(pickle.dumps(my_msg))
-                else:
-                    print(data)
             case bytes():
                 bitcoin_addr = payload
                 self.wallet_login(bitcoin_addr, conn)
@@ -145,8 +144,6 @@ class Node:
                 addr, port = self.sock_recv_conn.getsockname()
                 my_msg = Message(port, msg.get_sender(), data)
                 conn.send(pickle.dumps(my_msg))
-
-
 
     def handle_conn(self, conn):
         """handle_conn : function to handle a connection
