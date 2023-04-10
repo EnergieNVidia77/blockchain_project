@@ -18,7 +18,7 @@ miner = Miner(my_ip, my_port, blockchain)
 receive_thread = threading.Thread(target=miner.receive, daemon=True)
 receive_thread.start()
 
-try :
+try:
     target_ip = sys.argv[3]
     target_port = int(sys.argv[4])
     miner.connect(target_ip, target_port)
