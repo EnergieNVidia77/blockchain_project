@@ -8,7 +8,10 @@ class Block():
         self.previous_block_hash = previous_block_hash
         self.nonce = nonce
         self.transactions = transactions
-        self.hashList = [transaction.get_hash() for transaction in self.transactions]
+        try:
+            self.hashList = [transaction.get_hash() for transaction in self.transactions]
+        except TypeError:       # When generating Genesis
+            self.hashList = [hashlib.sha256(pickle.dumps("Genesis"))]
         self.header = mC.makeMerkel(self.hashList)
 
     # revoir l'arbre de merkel cree a partir de la liste de hash des transaction
