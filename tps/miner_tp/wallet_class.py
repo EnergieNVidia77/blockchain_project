@@ -11,7 +11,7 @@ import base58
 import ecdsa
 import binascii
 
-import ecdsa
+
 from ripemd import ripemd160
 import hashlib
 import binascii

@@ -17,7 +17,7 @@ class Block():
     # revoir l'arbre de merkel cree a partir de la liste de hash des transaction
     def get_header(self):
         return self.header
-    
+
     def __str__(self):
         res = 20*"-"+"\n"
         res += "Block\n"

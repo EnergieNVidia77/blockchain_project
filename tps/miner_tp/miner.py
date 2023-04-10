@@ -27,6 +27,7 @@ except IndexError:
 
 miner.print_node_info()
 
+
 while True:
     cmd = input()
     if cmd == 'exit':
@@ -36,4 +37,7 @@ while True:
         miner.print_node_info()
     if cmd == 'miner info':
         miner.print_miner_info()
-
+    if cmd == "do_pow":
+        proof_of_work_thread = threading.Thread(target=miner.do_proof_of_work())
+        proof_of_work_thread.start()
+        proof_of_work_thread.join()
