@@ -1,5 +1,5 @@
-# Classe des arbres de merkel
-class merkelTree:
+# Classe des arbres de Merkle
+class merkleTree:
     def __init__(self, v, nextL, nextR, nb=-1):
         self.value = v
         self.nextR = nextR
@@ -62,7 +62,7 @@ def makeMerkel(LV):
     size = len(LV)
     depth = findDepth(size)
     if depth <= 0:
-        return merkelTree(LV[0], None, None, 0)
+        return merkle   Tree(LV[0], None, None, 0)
     else:
         listR = []
         listL = []

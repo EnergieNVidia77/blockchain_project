@@ -1,4 +1,4 @@
-import merkel_class as mC
+import merkle_class as mC
 import hashlib
 import pickle
 

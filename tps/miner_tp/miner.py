@@ -40,4 +40,4 @@ while True:
     if cmd == "do_pow":
         proof_of_work_thread = threading.Thread(target=miner.do_proof_of_work())
         proof_of_work_thread.start()
-        proof_of_work_thread.join()
+        #proof_of_work_thread.join()

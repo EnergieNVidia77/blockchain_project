@@ -19,14 +19,15 @@ class Miner(Node):
         new_Block = Block(0, self.transactions, self.blockchain.get_last_block().get_hash())
 
     def do_proof_of_work(self):
+        print("Starting to find a nonce")
         nonce = 0
         starter = b'Test'
         while True:
             nonce_bytes = nonce.to_bytes(8, byteorder="big")
             hashed_data = nonce_bytes + starter
             hashed_result = hashlib.sha256(hashed_data).digest()
-
-            if hashed_result[0] == 0:
+            #"".join([int(hashlib.sha256(b"machin").digest()[i]) for i in range(5)])
+            if hashed_result[0:10] == 0:
                 print("Nonce trouvé : ", nonce)
                 break
             nonce += 1

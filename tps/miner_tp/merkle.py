@@ -1,4 +1,4 @@
-import merkel_class as mC
+import merkle_class as mC
 import transaction_class as Tr
 from block_class import Block
 
