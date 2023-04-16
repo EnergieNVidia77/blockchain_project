@@ -62,7 +62,7 @@ def makeMerkel(LV):
     size = len(LV)
     depth = findDepth(size)
     if depth <= 0:
-        return merkle   Tree(LV[0], None, None, 0)
+        return merkleTree(LV[0], None, None, 0)
     else:
         listR = []
         listL = []
