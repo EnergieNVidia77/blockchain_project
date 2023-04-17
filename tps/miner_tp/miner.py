@@ -6,6 +6,7 @@
 
 import sys
 import threading
+import select
 from blockchain_class import Blockchain
 from miner_class import Miner
 
@@ -28,16 +29,24 @@ except IndexError:
 miner.print_node_info()
 
 
-while True:
-    cmd = input()
-    if cmd == 'exit':
-        miner.close_connections()
-        break
-    if cmd == 'node info':
-        miner.print_node_info()
-    if cmd == 'miner info':
-        miner.print_miner_info()
-    if cmd == "do_pow":
-        proof_of_work_thread = threading.Thread(target=miner.do_proof_of_work())
-        proof_of_work_thread.start()
-        #proof_of_work_thread.join()
+def user_input():
+    while True:
+        input_ready, output_ready, except_ready = select.select([sys.stdin], [], [], 0)
+        for i in input_ready:
+            cmd = i.readline().strip()
+            if cmd == 'exit':
+                miner.close_connections()
+                break
+            if cmd == 'node info':
+                miner.print_node_info()
+            if cmd == 'miner info':
+                miner.print_miner_info()
+            if cmd == "do_pow":
+                proof_of_work_thread = threading.Thread(target=miner.do_proof_of_work)
+                proof_of_work_thread.start()
+
+
+main = threading.Thread(target=user_input)
+main.start()
+main.join()
+

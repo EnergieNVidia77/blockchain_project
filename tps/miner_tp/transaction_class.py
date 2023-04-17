@@ -19,7 +19,8 @@ class Transaction:
         return self.amount
 
     def get_hash(self):
-        content = (self.sender + self.recipient + str(self.amount)).encode("utf-8")
+
+        content = (self.sender.decode("utf-8") + self.recipient + str(self.amount)).encode("utf-8")
         return hash(content)
 
     def formatted_time(self):

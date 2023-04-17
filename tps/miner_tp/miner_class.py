@@ -12,26 +12,45 @@ class Miner(Node):
         self.blockchain = Blockchain()
         self.transactions = []
 
+        self.last_nonce = None
+
     def print_miner_info(self):
         print(self.transactions)
 
     def mining(self):
-        new_Block = Block(0, self.transactions, self.blockchain.get_last_block().get_hash())
+        print("Mining block")
+        new_Block = Block(self.last_nonce, self.transactions, self.blockchain.get_last_block().get_hash())
+        print("Broadcasting the new block")
+        self.blockchain.add_block(new_Block)
+        self.broadcast(new_Block)
+        self.transactions = []
 
-    def do_proof_of_work(self):
+    def get_content(self):
+        if len(self.transactions) == 0:
+            return None
+        else:
+            m = "".join([str(t.get_hash()) for t in self.transactions])
+            return m
+
+    def do_proof_of_work(self,difficuly=7):
         print("Starting to find a nonce")
-        nonce = 0
-        starter = b'Test'
-        while True:
-            nonce_bytes = nonce.to_bytes(8, byteorder="big")
-            hashed_data = nonce_bytes + starter
-            hashed_result = hashlib.sha256(hashed_data).digest()
-            #"".join([int(hashlib.sha256(b"machin").digest()[i]) for i in range(5)])
-            if hashed_result[0:10] == 0:
-                print("Nonce trouvé : ", nonce)
-                break
-            nonce += 1
-        print(nonce)
+        if self.get_content() is not None:
+            nonce = 0
+            starter = b'Test'
+            while True:
+                nonce_bytes = nonce.to_bytes(8, byteorder="big")
+                hashed_data = nonce_bytes + starter
+                hashed_result = str(hash(hashed_data))
+                answer = hashed_result[0:difficuly]
+                #print(answer)
+                if answer == difficuly*"5":
+                    print("Nonce trouvé : ", nonce)
+                    self.last_nonce = nonce
+                    self.mining()
+                    break
+                nonce += 1
+        else:
+            print("No transaction in the miner pool: Not doing POW")
 
     def msg_analysis(self, conn, msg):
         payload = msg.get_payload()

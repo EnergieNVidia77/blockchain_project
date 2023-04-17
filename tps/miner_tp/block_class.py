@@ -1,7 +1,7 @@
 import merkle_class as mC
 import hashlib
 import pickle
-
+from transaction_class import Transaction
 
 class Block():
     def __init__(self, nonce, transactions, previous_block_hash):
@@ -13,7 +13,8 @@ class Block():
             self.hashList = [transaction.get_hash() for transaction in self.transactions]
         except TypeError:       # When generating Genesis
             print("Creating Genesis")
-            self.hashList = [hashlib.sha256(pickle.dumps("Genesis"))]
+            self.transactions = [Transaction(b"Origin","Origin",100)]
+            self.hashList = [transaction.get_hash() for transaction in self.transactions]
 
         self.header = mC.makeMerkle(self.hashList)
 
@@ -25,7 +26,7 @@ class Block():
         res = 20*"-"+"\n"
         res += "Block\n"
         res += f"Hash of the previous block: {self.previous_block_hash}\n"
-        res += f"Hash of this block: {self.get_hash()}\n"
+        #res += f"Hash of this block: {self.get_hash()}\n"
         res += f"nonce: {self.nonce}\n"
         res += f"Number of transactions: {len(self.transactions)}\nList of transactions:\n"
 
@@ -36,7 +37,7 @@ class Block():
 
     # revoie le hash du block
     def get_hash(self):
-        bytes_block = pickle.dumps(self)
+        bytes_block = pickle.dumps(self.__str__())
         return hashlib.sha256(bytes_block)
 
     # return true si l'arbre contient des transaction faux sinon
