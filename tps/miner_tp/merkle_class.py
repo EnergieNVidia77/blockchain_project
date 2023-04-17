@@ -1,4 +1,5 @@
 # Classe des arbres de Merkle
+
 class merkleTree:
     def __init__(self, v, nextL, nextR, nb=-1):
         self.value = v
@@ -29,7 +30,9 @@ class merkleTree:
             return []
         else:
             depth = findDepth(self.nb)
+
             if i < 2**(depth - 1):
+
                 return [self.nextR.value] + self.nextL.proof(i%(2**(depth - 1)))
             else:
                 return [self.nextL.value] + self.nextR.proof(i%(2**(depth - 1)))
@@ -58,7 +61,7 @@ def printArbre(t):
 
 
 # Crée l'arbre de merkel associé a la liste LV passer en parametre
-def makeMerkel(LV):
+def makeMerkle(LV):
     size = len(LV)
     depth = findDepth(size)
     if depth <= 0:
@@ -72,7 +75,7 @@ def makeMerkel(LV):
                 listL.append(LV[i])
             else:
                 listR.append(LV[i])
-        toReturn = merkelTree(-1, makeMerkel(listL), makeMerkel(listR), size)
+        toReturn = merkleTree(-1, makeMerkle(listL), makeMerkle(listR), size)
         toReturnValue = toReturn.evalValue()
         toReturn.modifyValue(toReturnValue)
         return toReturn
@@ -80,8 +83,12 @@ def makeMerkel(LV):
 
 def EvalProof(proof, leaf, head):
     currentRes = leaf
+    print("Head: ", head)
     for i in reversed(proof):
-        currentRes = hash(i + currentRes)
+        print("i:", i)
+        currentRes = hash((i + currentRes))
+
+    print(currentRes,"currentRes")
     if currentRes == head:
         return True
     else:

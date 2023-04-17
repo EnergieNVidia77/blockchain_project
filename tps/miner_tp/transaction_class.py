@@ -1,5 +1,4 @@
 import datetime
-import hashlib
 
 
 class Transaction:
@@ -20,7 +19,8 @@ class Transaction:
         return self.amount
 
     def get_hash(self):
-        return hashlib.sha256(self)
+        content = (self.sender + self.recipient + str(self.amount)).encode("utf-8")
+        return hash(content)
 
     def formatted_time(self):
         return self.sent_time.strftime("%m/%d/%Y, %H:%M:%S")
