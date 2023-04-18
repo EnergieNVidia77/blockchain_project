@@ -1,4 +1,8 @@
 #Classe des arbres de merkel
+import hashlib
+import pickle
+
+
 class merkelTree:
     def __init__(self, v, nextL, nextR, nb = -1):
         self.value = v
@@ -17,7 +21,8 @@ class merkelTree:
         elif self.nextR != None and self.nextL == None:
             return self.nextL.evalValue()
         else :
-            return hash(self.nextR.evalValue() + self.nextL.evalValue())
+
+            return hashlib.sha256(pickle.dumps(int(self.nextR.evalValue().hexdigest(), 16) + int(self.nextL.evalValue().hexdigest(), 16)))
     #donne la preuve de la transaction numero i  in  [0, len(transction) - 1]
     def proof(self, i):
         if self.nb <= 1:
@@ -77,8 +82,8 @@ def makeMerkel(LV):
 def EvalProof(proof, leaf, head):
     currentRes = leaf
     for i in reversed(proof):
-        currentRes = hash(i + currentRes)
-    if currentRes == head:
+        currentRes = hashlib.sha256(pickle.dumps(int(i.hexdigest(), 16)+ int(currentRes.hexdigest(), 16)))
+    if currentRes.digest() == head.digest():
         return True
     else:
         return False

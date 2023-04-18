@@ -7,7 +7,7 @@ class Block():
         self.previous_block_hash = previous_block_hash
         self.nonce = nonce
         self.transactions = transactions
-        self.hashList = [transaction.get_hash() for transaction in self.transactions]
+        self.hashList = [hashlib.sha256(pickle.dumps(transaction)) for transaction in self.transactions]
         self.header = mC.makeMerkel(self.hashList)
 
     #revoir l'arbre de merkel cree a partir de la liste de hash des transaction
