@@ -32,15 +32,15 @@ class Miner(Node):
             m = "".join([str(t.get_hash()) for t in self.transactions])
             return m
 
-    def do_proof_of_work(self,difficuly=7):
+    def do_proof_of_work(self, difficuly=2):
         print("Starting to find a nonce")
         if self.get_content() is not None:
             nonce = 0
             starter = b'Test'
             while True:
                 nonce_bytes = nonce.to_bytes(8, byteorder="big")
-                hashed_data = nonce_bytes + starter
-                hashed_result = str(hash(hashed_data))
+                hashed_data = nonce_bytes + starter + self.blockchain.get_last_block().get_hash().hexdigest().encode("utf-8")
+                hashed_result = hashlib.sha256(hashed_data).hexdigest()
                 answer = hashed_result[0:difficuly]
                 #print(answer)
                 if answer == difficuly*"5":
