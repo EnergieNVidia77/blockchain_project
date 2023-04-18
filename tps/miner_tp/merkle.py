@@ -3,8 +3,8 @@ import transaction_class as Tr
 from block_class import Block
 
 
-transactionList = [Tr.Transaction("alice", "bob", 50), Tr.Transaction("didier", "ernest", 30),
-                    Tr.Transaction("philipe", "roger", 5), Tr.Transaction("patrick", "caramba", 150)]
+transactionList = [Tr.Transaction(b"alice", "bob", 50), Tr.Transaction(b"didier", "ernest", 30),
+                    Tr.Transaction(b"philipe", "roger", 5), Tr.Transaction(b"patrick", "caramba", 150)]
 myBlock = Block(122, transactionList, "salut les bro")
 print(myBlock)
 myMerkle = myBlock.get_header()

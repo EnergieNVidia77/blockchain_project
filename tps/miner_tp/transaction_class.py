@@ -1,4 +1,6 @@
 import datetime
+import hashlib
+import pickle
 
 
 class Transaction:
@@ -19,9 +21,9 @@ class Transaction:
         return self.amount
 
     def get_hash(self):
-
         content = (self.sender.decode("utf-8") + self.recipient + str(self.amount)).encode("utf-8")
-        return hash(content)
+        content = hashlib.sha256(pickle.dumps(content))
+        return content
 
     def formatted_time(self):
         return self.sent_time.strftime("%m/%d/%Y, %H:%M:%S")

@@ -1,4 +1,6 @@
 # Classe des arbres de Merkle
+import hashlib
+import pickle
 
 class merkleTree:
     def __init__(self, v, nextL, nextR, nb=-1):
@@ -20,7 +22,10 @@ class merkleTree:
         elif self.nextR != None and self.nextL == None:
             return self.nextL.evalValue()
         else:
-            return hash(self.nextR.evalValue() + self.nextL.evalValue())
+            return hashlib.sha256(pickle.dumps(
+                int(self.nextR.evalValue().hexdigest(), 16)
+                + int(self.nextL.evalValue().hexdigest(), 16)
+                ))
 
     # Donne la preuve de la transaction numero i  in  [0, len(transction) - 1]
     def proof(self, i):
@@ -86,10 +91,8 @@ def EvalProof(proof, leaf, head):
     print("Head: ", head)
     for i in reversed(proof):
         print("i:", i)
-        currentRes = hash((i + currentRes))
-
-    print(currentRes,"currentRes")
-    if currentRes == head:
+        currentRes = hashlib.sha256(pickle.dumps(int(i.hexdigest(), 16) + int(currentRes.hexdigest(), 16)))
+    if currentRes.digest() == head.digest():
         return True
     else:
         return False
