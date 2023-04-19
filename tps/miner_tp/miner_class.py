@@ -63,5 +63,3 @@ class Miner(Node):
                 if payload.get_sender() in self.wallets:
                     self.broadcast(payload)
                 self.transactions.append(payload)
-                if len(self.transactions) == 2:
-                    self.mining()

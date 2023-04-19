@@ -2,8 +2,9 @@
 import hashlib
 import pickle
 
+
 class merkleTree:
-    def __init__(self, v, nextL, nextR, nb=-1):
+    def __init__(self, v, nextL, nextR, nb = -1):
         self.value = v
         self.nextR = nextR
         self.nextL = nextL
@@ -21,13 +22,15 @@ class merkleTree:
             return self.nextR.evalValue()
         elif self.nextR != None and self.nextL == None:
             return self.nextL.evalValue()
+        # Donne la preuve de la transaction numero i  in  [0, len(transction) - 1]
         else:
             return hashlib.sha256(pickle.dumps(
                 int(self.nextR.evalValue().hexdigest(), 16)
                 + int(self.nextL.evalValue().hexdigest(), 16)
                 ))
 
-    # Donne la preuve de la transaction numero i  in  [0, len(transction) - 1]
+
+
     def proof(self, i):
         if self.nb <= 1:
             return []
@@ -90,8 +93,9 @@ def EvalProof(proof, leaf, head):
     currentRes = leaf
     print("Head: ", head)
     for i in reversed(proof):
-        print("i:", i)
-        currentRes = hashlib.sha256(pickle.dumps(int(i.hexdigest(), 16) + int(currentRes.hexdigest(), 16)))
+        currentRes = hashlib.sha256(pickle.dumps(
+            int(i.hexdigest(), 16) + int(currentRes.hexdigest(), 16)))
+
     if currentRes.digest() == head.digest():
         return True
     else:
