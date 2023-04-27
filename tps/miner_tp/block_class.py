@@ -5,16 +5,16 @@ from transaction_class import Transaction
 
 class Block():
     def __init__(self, nonce, transactions, previous_block_hash):
-        self.previous_block_hash = previous_block_hash
+        self.previous_block_hash = previous_block_hash.hexdigest()
         self.nonce = nonce
         self.transactions = transactions
 
         try:
-            self.hashList = [transaction.get_hash() for transaction in self.transactions]
+            self.hashList = [transaction.get_hash().hexdigest() for transaction in self.transactions]
         except TypeError:       # When generating Genesis
             print("Creating Genesis")
             self.transactions = [Transaction(b"Origin","Origin",100)]
-            self.hashList = [transaction.get_hash() for transaction in self.transactions]
+            self.hashList = [transaction.get_hash().hexdigest() for transaction in self.transactions]
 
         self.header = mC.makeMerkle(self.hashList)
 
@@ -52,3 +52,4 @@ class Block():
 
     def get_nonce(self):
         return self.nonce
+

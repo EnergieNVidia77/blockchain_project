@@ -15,7 +15,7 @@ class Miner(Node):
         self.last_nonce = None
 
     def print_miner_info(self):
-        print(self.transactions)
+        print("Transactions:", self.transactions)
 
     def mining(self):
         print("Mining block")
