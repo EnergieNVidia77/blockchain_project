@@ -46,3 +46,9 @@ class Block():
             return False
         else:
             return True
+
+    def get_transactions(self):
+        return self.transactions
+
+    def get_nonce(self):
+        return self.nonce
