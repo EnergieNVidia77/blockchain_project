@@ -20,7 +20,7 @@ class Miner(Node):
     def print_miner_info(self):
         print("Number of blocks: ", self.blockchain.get_nb_blocks())
         print("Hash of the previous block:",
-              self.blockchain.get_last_block().get_hash().hexdigest())
+              self.blockchain.get_last_block().get_previous_hash())
 
         print("Transactions:", self.transactions)
 
@@ -54,15 +54,12 @@ class Miner(Node):
                 hashed_result = hashlib.sha256(hashed_data).hexdigest()
                 answer = hashed_result[0:difficuly]
 
-                #print(answer)
                 if answer == difficuly*"5":
-                    print("Nonce trouvé : ", nonce)
-                    print(last_block_hash, "Hash of the previous block")
-                    print(add_content, "Transactions jointes")
-
+                    print("nb: ", nonce_bytes)
+                    print("lbh: ", last_block_hash)
+                    print("content: ", add_content)
                     self.last_nonce = nonce
                     self.mining()
-
                     break
                 nonce = rd.randint(0, 1000000000000000)
                 #nonce += 1
@@ -74,13 +71,15 @@ class Miner(Node):
         print("Nonce of the block: ", nonce)
 
         nonce_bytes = nonce.to_bytes(8, byteorder="big")
-        hashed_transactions = "".join([str(t.get_hash()) for t in transactions])
+        print("nb: ", nonce_bytes)
         last_block_hash = self.blockchain.get_last_block().get_hash().hexdigest().encode("utf-8")
-        print(last_block_hash, "Hash of the previous block")
-        print(hashed_transactions, "Transactions jointes")
-        hashed_data = nonce_bytes + last_block_hash + hashed_transactions.encode("utf-8")
+        print("lbh: ", last_block_hash)
+        hashed_transactions = "".join([str(t.get_hash()) for t in transactions]).encode("utf-8")
+        print("content: ", hashed_transactions)
 
+        hashed_data = nonce_bytes + last_block_hash + hashed_transactions.encode("utf-8")
         hashed_result = hashlib.sha256(hashed_data).hexdigest()
+        print("Résultat complet", hashed_result)
         answer = hashed_result[0:difficuly]
         print("Result of the puzzle: ", hashed_result)
         if answer == difficuly*"5":
@@ -92,18 +91,15 @@ class Miner(Node):
         match payload:
             case str():
                 nb_miners_bef4 = len(self.nodes_ports)
-
                 super().msg_analysis(conn, msg)
-
                 nb_miners = len(self.nodes_ports)
+
                 if nb_miners != nb_miners_bef4:
-                    print("New miners!")
+                    print("New miner!")
                     _, my_port = self.sock_recv_conn.getsockname()
                     dest = self.nodes_ports[-1]
                     to_send = Message(my_port, dest, self.blockchain)
                     packed_msg = pickle.dumps(to_send)
-                    print("Last block of the sent blockchain:\n",
-                          self.blockchain.get_last_block())
                     self.nodes_socket_dict[str(dest)].send(packed_msg)
 
             case bytes():
@@ -117,8 +113,6 @@ class Miner(Node):
             case Blockchain():
                 print("Replacing current blockchain with a new one")
                 self.blockchain = payload
-                print("Last block of the received blockchain:\n",
-                      self.blockchain.get_last_block())
 
             case Block():
                 print("Block received")

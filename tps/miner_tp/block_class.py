@@ -53,3 +53,5 @@ class Block():
     def get_nonce(self):
         return self.nonce
 
+    def get_previous_hash(self):
+        return self.previous_block_hash
