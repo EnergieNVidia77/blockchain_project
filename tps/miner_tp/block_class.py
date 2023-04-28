@@ -15,7 +15,7 @@ class Block():
             print("Creating Genesis")
             self.transactions = [Transaction(b"Origin","Origin",100)]
             self.hashList = [transaction.get_hash().hexdigest() for transaction in self.transactions]
-
+            self.nonce = 0
         self.header = mC.makeMerkle(self.hashList)
 
     # revoir l'arbre de merkel cree a partir de la liste de hash des transaction
