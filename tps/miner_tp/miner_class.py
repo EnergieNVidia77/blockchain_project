@@ -55,6 +55,7 @@ class Miner(Node):
                 answer = hashed_result[0:difficuly]
 
                 if answer == difficuly*"5":
+                    print("results of the puzzle", hashed_result)
                     print("nb: ", nonce_bytes)
                     print("lbh: ", last_block_hash)
                     print("content: ", add_content)
@@ -74,12 +75,11 @@ class Miner(Node):
         print("nb: ", nonce_bytes)
         last_block_hash = self.blockchain.get_last_block().get_hash().hexdigest().encode("utf-8")
         print("lbh: ", last_block_hash)
-        hashed_transactions = "".join([str(t.get_hash()) for t in transactions]).encode("utf-8")
+        hashed_transactions = "".join([str(t.get_hash()) for t in transactions])
         print("content: ", hashed_transactions)
 
         hashed_data = nonce_bytes + last_block_hash + hashed_transactions.encode("utf-8")
         hashed_result = hashlib.sha256(hashed_data).hexdigest()
-        print("Résultat complet", hashed_result)
         answer = hashed_result[0:difficuly]
         print("Result of the puzzle: ", hashed_result)
         if answer == difficuly*"5":
