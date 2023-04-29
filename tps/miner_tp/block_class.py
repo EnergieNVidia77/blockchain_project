@@ -31,7 +31,7 @@ class Block():
         res += f"Number of transactions: {len(self.transactions)}\nList of transactions:\n"
 
         for t in self.transactions:
-            res += str(t.get_hash()) + "\n"
+            res += str(t.get_hash().hexdigest()) + "\n"
         res += 20*"-"
         return res
 

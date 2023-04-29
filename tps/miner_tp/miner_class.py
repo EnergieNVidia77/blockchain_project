@@ -36,7 +36,7 @@ class Miner(Node):
         if len(self.transactions) == 0:
             return None
         else:
-            m = "".join([str(t.get_hash()) for t in self.transactions])
+            m = "".join([str(t.get_hash().hexdigest()) for t in self.transactions])
             return m
 
     def do_proof_of_work(self, difficuly=2):
@@ -49,17 +49,19 @@ class Miner(Node):
                 last_block_hash = self.blockchain.get_last_block().get_hash().hexdigest().encode("utf-8")
                 add_content = self.get_content().encode("utf-8")
 
-                hashed_data = nonce_bytes + last_block_hash + add_content
+                hashed_data = nonce_bytes + last_block_hash + (add_content)
 
                 hashed_result = hashlib.sha256(hashed_data).hexdigest()
                 answer = hashed_result[0:difficuly]
 
                 if answer == difficuly*"5":
+                    print("Dernier bloc:", self.blockchain.get_last_block())
+                    self.last_nonce = nonce
                     print("results of the puzzle", hashed_result)
+                    print("nonce: ", self.last_nonce)
                     print("nb: ", nonce_bytes)
                     print("lbh: ", last_block_hash)
                     print("content: ", add_content)
-                    self.last_nonce = nonce
                     self.mining()
                     break
                 nonce = rd.randint(0, 1000000000000000)
@@ -69,20 +71,27 @@ class Miner(Node):
 
     def checking_pow(self, transactions, nonce, difficuly=2):
         print("Checking POW")
-        print("Nonce of the block: ", nonce)
-
+        print("Dernier bloc:", self.blockchain.get_last_block())
         nonce_bytes = nonce.to_bytes(8, byteorder="big")
-        print("nb: ", nonce_bytes)
         last_block_hash = self.blockchain.get_last_block().get_hash().hexdigest().encode("utf-8")
-        print("lbh: ", last_block_hash)
-        hashed_transactions = "".join([str(t.get_hash()) for t in transactions])
-        print("content: ", hashed_transactions)
 
-        hashed_data = nonce_bytes + last_block_hash + hashed_transactions.encode("utf-8")
+        transactions_candidate = transactions
+        transactions_candidate.sort(key=lambda x: x.sent_time)
+        content = "".join([
+            str(t.get_hash().hexdigest()) for t in transactions_candidate
+            ]).encode("utf-8")
+
+        hashed_data = nonce_bytes + last_block_hash + (content)
         hashed_result = hashlib.sha256(hashed_data).hexdigest()
         answer = hashed_result[0:difficuly]
-        print("Result of the puzzle: ", hashed_result)
+
+        print("Hashed result: ", hashed_result)
+        print("nonce: ", nonce)
+        print("lbh: ", last_block_hash)
+        print("content:", content)
+
         if answer == difficuly*"5":
+            print("Valid block!")
             return True
         return False
 
@@ -109,6 +118,7 @@ class Miner(Node):
                 if payload.get_sender() in self.wallets:
                     self.broadcast(payload)
                 self.transactions.append(payload)
+                self.transactions.sort(key=lambda x: x.sent_time)
 
             case Blockchain():
                 print("Replacing current blockchain with a new one")
@@ -124,8 +134,5 @@ class Miner(Node):
                     # Remove all the transactions contained in the new block
                     # from the transaction pull of the miner
                     for t in payload.get_transactions():
-                        try:
-                            self.transactions.remove(t)
-                            print("[INFO]: A transaction was removed from the transaction pull")
-                        except ValueError:
-                            print("[INFO]: A transaction from the new block was not in the transaction pull")
+                        self.blockchain.add_block(payload)
+                        self.transactions = []
