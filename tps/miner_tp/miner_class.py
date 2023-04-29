@@ -55,13 +55,7 @@ class Miner(Node):
                 answer = hashed_result[0:difficuly]
 
                 if answer == difficuly*"5":
-                    print("Dernier bloc:", self.blockchain.get_last_block())
                     self.last_nonce = nonce
-                    print("results of the puzzle", hashed_result)
-                    print("nonce: ", self.last_nonce)
-                    print("nb: ", nonce_bytes)
-                    print("lbh: ", last_block_hash)
-                    print("content: ", add_content)
                     self.mining()
                     break
                 nonce = rd.randint(0, 1000000000000000)
@@ -71,7 +65,6 @@ class Miner(Node):
 
     def checking_pow(self, transactions, nonce, difficuly=2):
         print("Checking POW")
-        print("Dernier bloc:", self.blockchain.get_last_block())
         nonce_bytes = nonce.to_bytes(8, byteorder="big")
         last_block_hash = self.blockchain.get_last_block().get_hash().hexdigest().encode("utf-8")
 
@@ -84,11 +77,6 @@ class Miner(Node):
         hashed_data = nonce_bytes + last_block_hash + (content)
         hashed_result = hashlib.sha256(hashed_data).hexdigest()
         answer = hashed_result[0:difficuly]
-
-        print("Hashed result: ", hashed_result)
-        print("nonce: ", nonce)
-        print("lbh: ", last_block_hash)
-        print("content:", content)
 
         if answer == difficuly*"5":
             print("Valid block!")
