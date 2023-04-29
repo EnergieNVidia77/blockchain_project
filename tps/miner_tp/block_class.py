@@ -5,17 +5,17 @@ from transaction_class import Transaction
 
 class Block():
     def __init__(self, nonce, transactions, previous_block_hash):
-        self.previous_block_hash = previous_block_hash
+        self.previous_block_hash = previous_block_hash.hexdigest()
         self.nonce = nonce
         self.transactions = transactions
 
         try:
-            self.hashList = [transaction.get_hash() for transaction in self.transactions]
+            self.hashList = [transaction.get_hash().hexdigest() for transaction in self.transactions]
         except TypeError:       # When generating Genesis
             print("Creating Genesis")
             self.transactions = [Transaction(b"Origin","Origin",100)]
-            self.hashList = [transaction.get_hash() for transaction in self.transactions]
-
+            self.hashList = [transaction.get_hash().hexdigest() for transaction in self.transactions]
+            self.nonce = 0
         self.header = mC.makeMerkle(self.hashList)
 
     # revoir l'arbre de merkel cree a partir de la liste de hash des transaction
@@ -31,7 +31,7 @@ class Block():
         res += f"Number of transactions: {len(self.transactions)}\nList of transactions:\n"
 
         for t in self.transactions:
-            res += str(t.get_hash()) + "\n"
+            res += str(t.get_hash().hexdigest()) + "\n"
         res += 20*"-"
         return res
 
@@ -46,3 +46,12 @@ class Block():
             return False
         else:
             return True
+
+    def get_transactions(self):
+        return self.transactions
+
+    def get_nonce(self):
+        return self.nonce
+
+    def get_previous_hash(self):
+        return self.previous_block_hash
