@@ -133,6 +133,4 @@ class Miner(Node):
                     print("Valid new block received")
                     # Remove all the transactions contained in the new block
                     # from the transaction pull of the miner
-                    for t in payload.get_transactions():
-                        self.blockchain.add_block(payload)
-                        self.transactions = []
+                    self.transactions = []
