@@ -11,6 +11,7 @@ import time
 from message_class import Message
 from transaction_class import Transaction
 
+
 class Node:
 
     def __init__(self, host, port):
@@ -19,6 +20,7 @@ class Node:
             host (string): ip address of the node
             port (int): listening port of the node
         """
+        self.my_port = port
         self.sock_recv_conn = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
         self.sock_recv_conn.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock_recv_conn.bind((host, port))
@@ -83,7 +85,7 @@ class Node:
                 nodes_to_connect.append(int(list[i]))
         for node in nodes_to_connect:
             self.connect("localhost", node)
-    
+ 
     def logout_node(self,port):
         """logout_node : remove the node that just logged out
         Args:
@@ -164,7 +166,7 @@ class Node:
             Just accept new connections and then creates a thread to handle them
         """
         while True:
-            conn, addr =  self.sock_recv_conn.accept()
+            conn, addr = self.sock_recv_conn.accept()
             #self.nb_recv_conn += 1
             #print(f"Connected with {addr}")
             thread_node = threading.Thread(target=self.handle_conn, args=(conn,), daemon=True)
