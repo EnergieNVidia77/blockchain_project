@@ -33,6 +33,7 @@ class Miner(Node):
         self.broadcast(new_Block)
         self.transactions = []
 
+    # Function used to do the Proof of work
     def get_content(self):
         if len(self.transactions) == 0:
             return None
@@ -55,6 +56,7 @@ class Miner(Node):
                 hashed_result = hashlib.sha256(hashed_data).hexdigest()
                 answer = hashed_result[0:difficuly]
 
+                # Here, the miner solved the puzzle
                 if answer == difficuly*"5":
                     self.last_nonce = nonce
                     self.mining()
@@ -64,6 +66,7 @@ class Miner(Node):
         else:
             print("No transaction in the miner pool: Not doing POW")
 
+    # Function called when a new block is received
     def checking_pow(self, transactions, nonce, difficuly=2):
         print("Checking POW")
         nonce_bytes = nonce.to_bytes(8, byteorder="big")
@@ -88,14 +91,19 @@ class Miner(Node):
         payload = msg.get_payload()
         match payload:
             case str():
-                nb_miners_bef4 = len(self.nodes_ports)
+                # Get the current number of miner connected
+                nb_miners_before = len(self.nodes_ports)
                 super().msg_analysis(conn, msg)
+                # Get the current number of miner ConnectionAbortedError
+                # After analysis
                 nb_miners = len(self.nodes_ports)
 
-                if nb_miners != nb_miners_bef4:
+                # Comparing the 2 values, if it is different, it is a miner
+                if nb_miners != nb_miners_before:
                     print("New miner!")
                     _, my_port = self.sock_recv_conn.getsockname()
                     dest = self.nodes_ports[-1]
+                    # Send the blockchain to the new miner
                     to_send = Message(my_port, dest, self.blockchain)
                     packed_msg = pickle.dumps(to_send)
                     self.nodes_socket_dict[str(dest)].send(packed_msg)
@@ -109,6 +117,7 @@ class Miner(Node):
                 self.transactions.append(payload)
                 self.transactions.sort(key=lambda x: x.sent_time)
 
+            # Case when a new miner access to the network
             case Blockchain():
                 print("Replacing current blockchain with a new one")
                 self.blockchain = payload
@@ -123,6 +132,7 @@ class Miner(Node):
                     # Remove all the transactions contained in the new block
                     # from the transaction pull of the miner
                     self.transactions = []
+                    # Appending the block in the blockchain
                     self.blockchain.add_block(payload)
                 else:
                     print("Something went wrong")

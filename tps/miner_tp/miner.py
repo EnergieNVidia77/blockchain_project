@@ -31,6 +31,8 @@ miner.print_node_info()
 
 def user_input():
     while True:
+        # With this, we can still interact with the miner console while doing
+        # the proof of work
         input_ready, output_ready, except_ready = select.select([sys.stdin], [], [], 0)
         for i in input_ready:
             cmd = i.readline().strip()
