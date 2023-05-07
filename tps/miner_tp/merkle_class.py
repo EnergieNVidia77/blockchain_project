@@ -19,15 +19,15 @@ class merkleTree:
         if self.nextR == None and self.nextL == None:
             return self.value
         elif self.nextR == None and self.nextL != None:
-            return self.nextR.evalValue()
+            return self.nextR.evalValue().hexdigest()
         elif self.nextR != None and self.nextL == None:
-            return self.nextL.evalValue()
+            return self.nextL.evalValue().hexdigest()
         # Donne la preuve de la transaction numero i  in  [0, len(transction) - 1]
         else:
             return hashlib.sha256(pickle.dumps(
-                int(self.nextR.evalValue().hexdigest(), 16)
-                + int(self.nextL.evalValue().hexdigest(), 16)
-                ))
+                int(self.nextR.evalValue(), 16)
+                + int(self.nextL.evalValue(), 16)
+                )).hexdigest()
 
 
 

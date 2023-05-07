@@ -23,7 +23,7 @@ class Transaction:
     def get_hash(self):
         content = (self.sender.decode("utf-8") + self.recipient + str(self.amount)).encode("utf-8")
         content = hashlib.sha256(pickle.dumps(content))
-        return content
+        return content.hexdigest()
 
     def formatted_time(self):
         return self.sent_time.strftime("%m/%d/%Y, %H:%M:%S")

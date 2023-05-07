@@ -3,7 +3,7 @@ import hashlib
 
 class Blockchain():
     def __init__(self):
-        genesis_block = Block(None, None, hashlib.sha256(b"Genesis"))
+        genesis_block = Block(None, None, hashlib.sha256(b"Genesis").hexdigest())
         self.blocks = [genesis_block]
 
     def add_block(self, block):

@@ -14,13 +14,14 @@ class Miner(Node):
         super().__init__(host, port)
         self.blockchain = Blockchain()
         self.transactions = []
-
         self.last_nonce = None
 
     def print_miner_info(self):
         print("Number of blocks: ", self.blockchain.get_nb_blocks())
-        print("Hash of the previous block:",
-              self.blockchain.get_last_block().get_previous_hash())
+        print("Hash of last block: ",
+              self.blockchain.get_last_block().get_hash())
+        #print("Hash of the previous block:",
+              #self.blockchain.get_last_block().get_previous_hash())
 
         print("Transactions:", self.transactions)
 
@@ -36,7 +37,7 @@ class Miner(Node):
         if len(self.transactions) == 0:
             return None
         else:
-            m = "".join([str(t.get_hash().hexdigest()) for t in self.transactions])
+            m = "".join([str(t.get_hash()) for t in self.transactions])
             return m
 
     def do_proof_of_work(self, difficuly=2):
@@ -46,7 +47,7 @@ class Miner(Node):
             #nonce = 0
             while True:
                 nonce_bytes = nonce.to_bytes(8, byteorder="big")
-                last_block_hash = self.blockchain.get_last_block().get_hash().hexdigest().encode("utf-8")
+                last_block_hash = self.blockchain.get_last_block().get_hash().encode("utf-8")
                 add_content = self.get_content().encode("utf-8")
 
                 hashed_data = nonce_bytes + last_block_hash + (add_content)
@@ -66,12 +67,12 @@ class Miner(Node):
     def checking_pow(self, transactions, nonce, difficuly=2):
         print("Checking POW")
         nonce_bytes = nonce.to_bytes(8, byteorder="big")
-        last_block_hash = self.blockchain.get_last_block().get_hash().hexdigest().encode("utf-8")
+        last_block_hash = self.blockchain.get_last_block().get_hash().encode("utf-8")
 
         transactions_candidate = transactions
         transactions_candidate.sort(key=lambda x: x.sent_time)
         content = "".join([
-            str(t.get_hash().hexdigest()) for t in transactions_candidate
+            str(t.get_hash()) for t in transactions_candidate
             ]).encode("utf-8")
 
         hashed_data = nonce_bytes + last_block_hash + (content)
@@ -122,3 +123,6 @@ class Miner(Node):
                     # Remove all the transactions contained in the new block
                     # from the transaction pull of the miner
                     self.transactions = []
+                    self.blockchain.add_block(payload)
+                else:
+                    print("Something went wrong")
