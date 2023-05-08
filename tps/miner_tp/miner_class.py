@@ -31,6 +31,26 @@ class Miner(Node):
         print("Broadcasting the new block")
         self.blockchain.add_block(new_Block)
         self.broadcast(new_Block)
+        print(self.transactions)
+        for transaction in self.transactions:
+            recipient = str.encode(transaction.get_recipient())
+            if recipient in self.wallets:
+                # create updating message
+                wallet_socket = self.wallets[recipient]
+                wallet_msg = f"/receiving {transaction.get_amount()}"
+                wallet_payload = Message(self.my_port, recipient, wallet_msg)
+                packed_msg = pickle.dumps(wallet_payload)
+                wallet_socket.send(packed_msg)
+            sender = transaction.get_sender()
+            print(sender)
+            print(type(sender))
+            if sender in self.wallets:
+                # create updating message
+                wallet_socket = self.wallets[sender]
+                wallet_msg = f"/paying {transaction.get_amount()}"
+                wallet_payload = Message(self.my_port, sender, wallet_msg)
+                packed_msg = pickle.dumps(wallet_payload)
+                wallet_socket.send(packed_msg)
         self.transactions = []
 
     # Function used to do the Proof of work
@@ -132,7 +152,31 @@ class Miner(Node):
                     # Remove all the transactions contained in the new block
                     # from the transaction pull of the miner
                     self.transactions = []
+
                     # Appending the block in the blockchain
                     self.blockchain.add_block(payload)
+                    
+                    # check if updated wallet in my dictionnary
+                    for transaction in payload.get_transactions():
+                        recipient = str.encode(transaction.get_recipient())
+                        if recipient in self.wallets:
+                            # create updating message
+                            wallet_socket = self.wallets[recipient]
+                            wallet_msg = f"/receiving {transaction.get_amount()}"
+                            wallet_payload = Message(self.my_port, recipient, wallet_msg)
+                            packed_msg = pickle.dumps(wallet_payload)
+                            wallet_socket.send(packed_msg)
+                        sender = transaction.get_sender()
+                        print(sender)
+                        print(type(sender))
+                        if sender in self.wallets:
+                            # create updating message
+                            wallet_socket = self.wallets[sender]
+                            wallet_msg = f"/paying {transaction.get_amount()}"
+                            wallet_payload = Message(self.my_port, sender, wallet_msg)
+                            packed_msg = pickle.dumps(wallet_payload)
+                            wallet_socket.send(packed_msg)
                 else:
                     print("Something went wrong")
+                    
+

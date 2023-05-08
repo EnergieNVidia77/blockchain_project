@@ -39,25 +39,25 @@ class Wallet:
         ecdsaPrivateKey = ecdsa.SigningKey.generate(curve=ecdsa.SECP256k1)
         self.private_key = ecdsaPrivateKey
         #print("ECDSA Private Key: ", ecdsaPrivateKey.to_string().hex())
-        ecdsaPublicKey = '04' +  ecdsaPrivateKey.get_verifying_key().to_string().hex()
+        ecdsaPublicKey = '04' + ecdsaPrivateKey.get_verifying_key().to_string().hex()
         self.public_key = ecdsaPublicKey
         #print("ECDSA Public Key: ", ecdsaPublicKey)
         hash256FromECDSAPublicKey = hashlib.sha256(binascii.unhexlify(ecdsaPublicKey)).hexdigest()
-        #print("SHA256(ECDSA Public Key): ", hash256FromECDSAPublicKey)
+        # print("SHA256(ECDSA Public Key): ", hash256FromECDSAPublicKey)
         ripemd160FromHash256 = hashlib.new('ripemd160', binascii.unhexlify(hash256FromECDSAPublicKey))
-        #print("RIPEMD160(SHA256(ECDSA Public Key)): ", ripemd160FromHash256.hexdigest())
+        # print("RIPEMD160(SHA256(ECDSA Public Key)): ", ripemd160FromHash256.hexdigest())
         prependNetworkByte = '00' + ripemd160FromHash256.hexdigest()
-        #print("Prepend Network Byte to RIDEMP160(SHA256(ECDSA Public Key)): ", prependNetworkByte)
+        # print("Prepend Network Byte to RIDEMP160(SHA256(ECDSA Public Key)): ", prependNetworkByte)
         hash = prependNetworkByte
         for x in range(1,3):
             hash = hashlib.sha256(binascii.unhexlify(hash)).hexdigest()
             #print("\t|___>SHA256 #", x, " : ", hash)
         cheksum = hash[:8]
-        #print("Checksum(first 4 bytes): ", cheksum)
+        # print("Checksum(first 4 bytes): ", cheksum)
         appendChecksum = prependNetworkByte + cheksum
-        #print("Append Checksum to RIDEMP160(SHA256(ECDSA Public Key)): ", appendChecksum)
+        # print("Append Checksum to RIDEMP160(SHA256(ECDSA Public Key)): ", appendChecksum)
         bitcoinAddress = base58.b58encode(binascii.unhexlify(appendChecksum))
-        #print("Bitcoin Address: ", bitcoinAddress.decode('utf8'), " ", len(bitcoinAddress))
+        # print("Bitcoin Address: ", bitcoinAddress.decode('utf8'), " ", len(bitcoinAddress))
         return bitcoinAddress
 
     def handle_connection(self, conn):
@@ -90,5 +90,20 @@ class Wallet:
         data = payload.split()
         if data[0] == "/sucess_log":
             print("Sucessfully connected to network")
+        if data[0] == "/receiving":
+            self.increase_balance(data[1])
+            self.check_balance()
+        if data[0] == "/paying":
+            self.decrease_balance(data[1])
+            self.check_balance()
+
+    def increase_balance(self, amount):
+        self.balance += int(amount)
+
+    def decrease_balance(self, amount):
+        self.balance -= int(amount)
+
+    def check_balance(self):
+        print(f"current balance : {self.balance}")
 
     # TODO: List header block, test d'appartenance transaction

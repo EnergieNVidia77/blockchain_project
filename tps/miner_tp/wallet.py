@@ -15,3 +15,5 @@ while True:
     """
     if msg_array[0] == "/transac":
         wall.send_transaction(msg)
+    if msg_array[0] == "/balance":
+        wall.check_balance()
