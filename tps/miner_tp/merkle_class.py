@@ -91,12 +91,11 @@ def makeMerkle(LV):
 
 def EvalProof(proof, leaf, head):
     currentRes = leaf
-    print("Head: ", head)
     for i in reversed(proof):
         currentRes = hashlib.sha256(pickle.dumps(
-            int(i.hexdigest(), 16) + int(currentRes.hexdigest(), 16)))
+            int(i, 16) + int(currentRes, 16))).hexdigest()
 
-    if currentRes.digest() == head.digest():
+    if currentRes == head:
         return True
     else:
         return False

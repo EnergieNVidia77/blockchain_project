@@ -7,6 +7,7 @@ import hashlib
 import random as rd
 from message_class import Message
 import pickle
+import merkle_class as mC
 
 
 class Miner(Node):
@@ -31,7 +32,6 @@ class Miner(Node):
         print("Broadcasting the new block")
         self.blockchain.add_block(new_Block)
         self.broadcast(new_Block)
-        print(self.transactions)
         for transaction in self.transactions:
             recipient = str.encode(transaction.get_recipient())
             if recipient in self.wallets:
@@ -42,8 +42,6 @@ class Miner(Node):
                 packed_msg = pickle.dumps(wallet_payload)
                 wallet_socket.send(packed_msg)
             sender = transaction.get_sender()
-            print(sender)
-            print(type(sender))
             if sender in self.wallets:
                 # create updating message
                 wallet_socket = self.wallets[sender]
@@ -106,11 +104,40 @@ class Miner(Node):
             print("Valid block!")
             return True
         return False
+    
+    def checking_transaction(self, sender, receiver, amount):
+        transaction = Transaction(str.encode(sender), receiver, amount)
+        transaction_hash = transaction.get_hash()
+        res = []
+        for i, block in enumerate(self.blockchain.blocks[1::]):
+            if transaction_hash in block.hashList:
+                block_root = block.get_header().get_root()
+                block_transactions = block.get_transactions()
+                block_transac_hashLists =  [transaction.get_hash() for transaction in block_transactions]
+                merkleTree = mC.makeMerkle(block_transac_hashLists)
+                if merkleTree.get_root() == block_root:
+                    res.append(i+1)
+        return res
+                   
+
 
     def msg_analysis(self, conn, msg):
         payload = msg.get_payload()
         match payload:
             case str():
+                data = payload.split()
+                if data[0] == "/check":
+                    print("Checking...")
+                    res = self.checking_transaction(data[1], data[2], data[3])
+                    if len(res) == 0:
+                        payload = "Your transaction is not yet inside the blockchain"
+                        msg = Message(self.my_port, data[1], payload)
+                        conn.send(pickle.dumps(msg))
+                    else:
+                        blocks_pr = "\n".join(str(e) for e in res)
+                        payload = "Your transaction is in block nummber(s): \n" + blocks_pr
+                        msg = Message(self.my_port, data[1], payload)
+                        conn.send(pickle.dumps(msg))
                 # Get the current number of miner connected
                 nb_miners_before = len(self.nodes_ports)
                 super().msg_analysis(conn, msg)
@@ -167,8 +194,6 @@ class Miner(Node):
                             packed_msg = pickle.dumps(wallet_payload)
                             wallet_socket.send(packed_msg)
                         sender = transaction.get_sender()
-                        print(sender)
-                        print(type(sender))
                         if sender in self.wallets:
                             # create updating message
                             wallet_socket = self.wallets[sender]

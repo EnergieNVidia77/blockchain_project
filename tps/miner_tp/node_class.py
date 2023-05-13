@@ -153,7 +153,7 @@ class Node:
             conn (socket): socket of the current connection
         """
         while True:
-            packed_recv_msg = conn.recv(1024)
+            packed_recv_msg = conn.recv(4096)
             if not packed_recv_msg:
                 print("No data or connection lost")
                 break

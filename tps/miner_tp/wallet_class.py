@@ -77,13 +77,19 @@ class Wallet:
 
     def rcv_transaction(self, conn):
         while True:
-            packed_recv_msg = conn.recv(1024)
+            packed_recv_msg = conn.recv(4096)
             if not packed_recv_msg:
                 print("No data or connection lost")
                 return
             recv_msg = pickle.loads(packed_recv_msg)
             print(f"{recv_msg}")
             self.msg_analysis(recv_msg)
+    
+    def check_transac(self, array_cmd):
+        cmd = ' '.join(str(e) for e in array_cmd)
+        msg = Message(self.port, self.node, cmd)
+        self.sock_emit_conn.send(pickle.dumps(msg))
+
 
     def msg_analysis(self, msg):
         payload = msg.get_payload()
