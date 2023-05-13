@@ -77,7 +77,13 @@ def makeMerkel(LV):
 def EvalProof(proof, leaf, head):
     currentRes = leaf
     for i in reversed(proof):
+<<<<<<< Updated upstream:tps/miner_tp/merkelClass.py
         currentRes = hash(i + currentRes)
+=======
+        currentRes = hashlib.sha256(pickle.dumps(
+            int(i, 16) + int(currentRes, 16))).hexdigest()
+
+>>>>>>> Stashed changes:tps/miner_tp/merkle_class.py
     if currentRes == head:
         return True
     else:
