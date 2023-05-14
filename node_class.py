@@ -97,6 +97,7 @@ class Node:
     def wallet_login(self, bitcoin_addr, port):
         """wallet_login : register a new wallet
         Args:
+            bitcoin_addr : bitcoin address of the wallet loging in 
             port (str): port of the wallet
         """
         self.wallets[bitcoin_addr] = port
@@ -176,7 +177,8 @@ class Node:
         """send_port : send the /port command to the node I connected to
         Args:
             conn (socket): socket of the current connection
-            port (int): port to send
+            sender (int): port of the sender
+            recipient (int): port of the recipient
         """
         data = "/port " + str(sender)
         msg_to_send = Message(sender, recipient, data)
