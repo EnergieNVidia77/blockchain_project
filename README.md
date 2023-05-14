@@ -35,3 +35,16 @@ adr_destination étant l'adresse d'un wallet et montant, la quantité que le wal
 do_pow
 ```
 * Lorsqu'un mineur a réussit la preuve de travail, il diffuse le nouveau bloc à travers le réseau.
+
+## Vérifier qu'une transaction existe
+Un mineur peut voir si une transaction est dans la blockchain en saisissant la commande
+```
+/check origine destination montant
+```
+avec origine et destination, les adresses d'origine et destination de la transactions, et montant, la quantité de token transféré
+
+## Token disponible pour un wallet
+Un wallet peut regarder la quantité de token qu'il possède avec la commande
+```
+/balance
+```
