@@ -41,7 +41,7 @@ Un mineur peut voir si une transaction est dans la blockchain en saisissant la c
 ```
 /check origine destination montant
 ```
-avec origine et destination, les adresses d'origine et destination de la transactions, et montant, la quantité de token transféré
+avec origine et destination, les adresses d'origine et destination de la transaction, et montant, la quantité de token transféré
 
 ## Token disponible pour un wallet
 Un wallet peut regarder la quantité de token qu'il possède avec la commande
